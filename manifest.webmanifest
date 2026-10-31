@@ -1,0 +1,17 @@
+{
+  "name": "Crisxlift",
+  "short_name": "Crisxlift",
+  "description": "Tu rutina, tus series y tus pesos. Solo entra y entrena.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1330",
+  "theme_color": "#0e1330",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
