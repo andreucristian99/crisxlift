@@ -270,6 +270,7 @@ button{cursor:pointer}
 .warm-t{flex:1;min-width:0;font-size:13px;color:var(--muted);line-height:1.35}
 .warm-t b{display:block;color:var(--fg);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .warm-ok{flex:0 0 auto;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
+.warm.cool{margin-top:12px}
 .warm-ok[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--bg)}
 .warm.done{border-style:solid;border-color:rgba(83,211,166,.35)}
 .paper td{white-space:nowrap}
@@ -479,46 +480,121 @@ const CLIENTS = {
       ]}
     ]
   },
-  "CX4821": {
-    name: "Marta", block: "Bloque 2 · Semana 3",
+  /* ---------- Leonel · datos reales (rutina de la semana 7; "última vez" = su último registro en el Excel) ---------- */
+  "CX5132": {
+    name: "Leonel", block: "Semana 7", seedVer: 1, lastWeek: "Semana 7",
     days: [
-      { id:"A", label:"Día A · Torso", exercises:[
-        { name:"Press banca", meta:"Barra · Pecho", cues:["Escápulas atrás y abajo","Pies firmes, bajar controlado 2 s"], sets:[
-          {type:"aprox", target:"5 reps · ligero", prev:"50×5"},
-          {type:"top", target:"6–8 reps · RIR 1", prev:"70×7"},
-          {type:"bo", target:"8–10 reps · RIR 2", prev:"60×9"},
-          {type:"bo2", target:"10–12 reps · RIR 2", prev:"52,5×11"} ]},
-        { name:"Remo con barra", meta:"Barra · Espalda", cues:["Torso a 45°","Tirar con los codos hacia la cadera"], sets:[
-          {type:"aprox", target:"6 reps · ligero", prev:"40×6"},
-          {type:"top", target:"8–10 reps · RIR 1", prev:"60×9"},
-          {type:"bo", target:"10–12 reps · RIR 2", prev:"50×11"} ]},
-        { name:"Press militar mancuernas", meta:"Mancuernas · Hombro", cues:["Sentado, espalda apoyada","No arquear la zona lumbar"], sets:[
-          {type:"top", target:"8–10 reps · RIR 1", prev:"18×9"},
-          {type:"bo", target:"10–12 reps · RIR 2", prev:"14×12"} ]},
-        { name:"Jalón al pecho", meta:"Polea · Espalda", cues:["Pecho arriba","Bajar la barra a la clavícula"], sets:[
-          {type:"top", target:"10–12 reps · RIR 1", prev:"55×11"},
-          {type:"bo", target:"12–15 reps · RIR 2", prev:"45×13"},
-          {type:"bo2", target:"12–15 reps · RIR 1", prev:"40×14"} ]}
+      { id:"U1", label:"Día 1 · Upper A", warm:[{n:"Movilidad tren superior y cintura pélvica", t:"1 min", url:"https://www.youtube.com/shorts/1wg1Ha5X4_k"}], cool:[{n:"Cinta en pendiente al máximo, velocidad 3,5", t:"10 min"}], exercises:[
+        { name:"RDL", video:"5rIqP63yWFg", cues:["Aquí sí cuentas la barra en el peso"], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"aprox", target:"4 reps"},
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"5 reps", prev:"120×6"},
+          {type:"bo", target:"7–8 reps", prev:"120×4"} ]},
+        { name:"Extensión lumbar en banco", video:"_lrQxyQd7A8", ref:{url:"https://www.youtube.com/shorts/qgZqZ3AIgAA", label:"Estirar columna"}, cues:["Prioriza el rango de movimiento","Al terminar: estirar columna 1 min como máximo (mejora el grip)"], sets:[
+          {type:"top", target:"12 reps", prev:"20×12"},
+          {type:"bo", target:"12 reps", prev:"20×12"} ]},
+        { name:"Jalón al pecho en polea prono", video:"cUgU2dHkAbg", cues:["Con retroversión pélvica"], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"10 reps", prev:"65×10"},
+          {type:"bo", target:"10 reps", prev:"60×10"},
+          {type:"bo2", target:"10 reps", prev:"60×9"} ]},
+        { name:"Remo en polea con agarre amplio", video:"cqVLUHXW1lc", cues:["Aproximación según sensaciones: añádela si la necesitas"], sets:[
+          {type:"top", target:"7 reps", prev:"50×9"},
+          {type:"bo", target:"9 reps", prev:"50×8"} ]},
+        { name:"Press inclinado con mancuernas", video:"J_x6MEFk3DM", setup:"Banco a 30°", cues:[], sets:[
+          {type:"aprox", target:"3 reps"},
+          {type:"aprox", target:"3 reps"},
+          {type:"top", target:"8 reps", prev:"38×7"},
+          {type:"bo", target:"10 reps", prev:"32×8"} ]},
+        { name:"Elevaciones laterales con mancuernas", video:"lvUvnvXgh-Y", cues:["Al acabar cada serie, sigue con parciales"], sets:[
+          {type:"top", target:"12 reps + parciales", prev:"12×12"},
+          {type:"bo", target:"12 reps + parciales", prev:"12×11"} ]},
+        { name:"Curl de bíceps en banco Scott de espaldas", video:"076VoVzIPW0", cues:["Como en el vídeo, pero sentado y apoyando el tríceps en el banco"], sets:[
+          {type:"top", target:"10 reps", prev:"14×12"},
+          {type:"bo", target:"10 reps", prev:"14×12"} ]}
       ]},
-      { id:"B", label:"Día B · Pierna", exercises:[
-        { name:"Sentadilla", meta:"Barra · Cuádriceps", cues:["Rodillas en la línea de los pies","Romper el paralelo"], sets:[
-          {type:"aprox", target:"5 reps · ligero", prev:"60×5"},
-          {type:"aprox", target:"3 reps · medio", prev:"80×3"},
-          {type:"top", target:"5–7 reps · RIR 1", prev:"100×6"},
-          {type:"bo", target:"8–10 reps · RIR 2", prev:"85×9"} ]},
-        { name:"Peso muerto rumano", meta:"Barra · Femoral", cues:["Cadera atrás, barra pegada a las piernas","Bajar hasta notar el estiramiento"], sets:[
-          {type:"top", target:"8–10 reps · RIR 2", prev:"80×9"},
-          {type:"bo", target:"10–12 reps · RIR 2", prev:"70×11"} ]},
-        { name:"Prensa", meta:"Máquina · Cuádriceps", cues:["Pies a la anchura de cadera","No despegar la cadera del respaldo"], sets:[
-          {type:"top", target:"10–12 reps · RIR 1", prev:"180×11"},
-          {type:"bo", target:"12–15 reps · RIR 1", prev:"150×14"} ]},
-        { name:"Curl femoral tumbado", meta:"Máquina · Femoral", cues:["Subir rápido, bajar en 3 s"], sets:[
-          {type:"top", target:"10–12 reps · RIR 1", prev:"35×12"},
-          {type:"bo", target:"12–15 reps · RIR 1", prev:"30×13"} ]},
-        { name:"Extensión de cuádriceps", meta:"Máquina Technogym · Cuádriceps", photo:"extQuads", video:"ap1RsdCzZN4",
-          cues:["Rodilla alineada con el eje de giro de la máquina","Rodillo apoyado justo encima del tobillo","Subir controlado y aguantar 1 s arriba"], sets:[
-          {type:"top", target:"10–12 reps · RIR 1", prev:"45×11"},
-          {type:"bo", target:"12–15 reps · RIR 1", prev:"35×13"} ]}
+      { id:"L1", label:"Día 2 · Legday A", lastWeek:"Semana 6", cool:[{n:"Elíptica", t:"10 min"}], exercises:[
+        { name:"Extensión de gemelos", video:"ZFephCP1AXU", cues:[], sets:[
+          {type:"top", target:"12 reps", prev:"140×12"},
+          {type:"bo", target:"12 reps", prev:"140×12"},
+          {type:"bo2", target:"12 reps"} ]},
+        { name:"Curl femoral tumbado", video:"B6t8MvbTtew", cues:[], sets:[
+          {type:"top", target:"10 reps", prev:"35×10"},
+          {type:"bo", target:"10 reps", prev:"35×10"} ]},
+        { name:"Extensión de cuádriceps en máquina de placas", video:"ap1RsdCzZN4", cues:[], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"7 reps", prev:"90×7"},
+          {type:"bo", target:"10 reps", prev:"70×10"},
+          {type:"bo2", target:"10 reps"} ]},
+        { name:"Sentadilla hack", video:"itmlCUc0P3k", cues:[], sets:[
+          {type:"aprox", target:"5 reps"},
+          {type:"aprox", target:"5 reps"},
+          {type:"top", target:"6 reps", prev:"100×7"},
+          {type:"bo", target:"8–9 reps", prev:"80×10"} ]},
+        { name:"Sissy squat", video:"AYN-U5nZieY", cues:["Libre, sin peso: apunta 0 kg"], sets:[
+          {type:"top", target:"10 reps"},
+          {type:"bo", target:"10 reps"} ]},
+        { name:"Elevaciones laterales con mancuernas", video:"lvUvnvXgh-Y", cues:[], sets:[
+          {type:"top", target:"12 reps", prev:"10×14"},
+          {type:"bo", target:"12 reps", prev:"10×12"} ]},
+        { name:"Abs wheel", video:"pTOsnzYMiXc", cues:["Sin peso: apunta 0 kg"], sets:[
+          {type:"top", target:"10 reps"},
+          {type:"bo", target:"10 reps"} ]}
+      ]},
+      { id:"U2", label:"Día 3 · Upper B", lastWeek:"Semana 6", warm:[{n:"Movilidad tren superior 1", t:"2 min", url:"https://www.youtube.com/shorts/ovlIa5-kOws"}], exercises:[
+        { name:"Dragon flag", video:"XQkp7KlIgJo", cues:["Sin peso: apunta 0 kg y las reps que salgan"], sets:[
+          {type:"top", target:"Las que salgan"},
+          {type:"bo", target:"Las que salgan"} ]},
+        { name:"Press inclinado en Smith", video:"xGMqmmn5Z7Q", setup:"Banco a 45°", cues:["Apunta solo el peso de los discos, sin contar la máquina"], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"7 reps", prev:"35×7"},
+          {type:"bo", target:"10 reps", prev:"30×10"},
+          {type:"bo2", target:"10 reps", prev:"30×8"} ]},
+        { name:"Press plano en máquina Technogym", video:"qcZKInOQQCw", setup:"Asiento 4", cues:[], sets:[
+          {type:"top", target:"8 reps", prev:"100×5"},
+          {type:"bo", target:"10 reps", prev:"80×10"} ]},
+        { name:"Peck deck", video:"a9vQ_hwIksU", setup:"Asiento 5", cues:["Al acabar cada serie, sigue con parciales"], sets:[
+          {type:"top", target:"12 reps + parciales", prev:"25×12"},
+          {type:"bo", target:"12 reps + parciales"} ]},
+        { name:"Jalón unilateral hammer", uni:true, video:"R7yUVcv5Cuw", cues:[], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"10 reps", prev:"40×8"},
+          {type:"bo", target:"10 reps", prev:"35×10"} ]},
+        { name:"Remo en T", video:"udi--2PLXAQ", cues:[], sets:[
+          {type:"aprox", target:"4 reps"},
+          {type:"top", target:"7 reps", prev:"50×9"},
+          {type:"bo", target:"10 reps", prev:"40×10"} ]},
+        { name:"Extensión de tríceps katana en polea", video:"LRF9kRWJGdY", cues:[], sets:[
+          {type:"top", target:"10 reps", prev:"22,5×13"},
+          {type:"bo", target:"10 reps", prev:"25×8"} ]},
+        { name:"Curl de bíceps en banco inclinado", video:"2bzTfdB3j4M", setup:"Banco a 30°", cues:[], sets:[
+          {type:"top", target:"10 reps", prev:"14×11"},
+          {type:"bo", target:"10 reps", prev:"14×10"} ]}
+      ]},
+      { id:"L2", label:"Día 4 · Legday B", lastWeek:"Semana 6", warm:[{n:"Estirar isquios", t:"1 min", url:"https://www.youtube.com/shorts/K0WNeH9ivkw"},{n:"Movilidad isquiosurales", t:"1 min", url:"https://www.youtube.com/watch?v=gxdctqpEEfw"}], cool:[{n:"Elíptica", t:"8 min"}], exercises:[
+        { name:"RDL en Smith (step + analítico)", video:"l6a8xR6oSjo", cues:[], sets:[
+          {type:"top", target:"10 reps"},
+          {type:"bo", target:"10 reps"} ]},
+        { name:"Curl femoral tumbado", video:"B6t8MvbTtew", cues:[], sets:[
+          {type:"top", target:"12 reps"},
+          {type:"bo", target:"12 reps"} ]},
+        { name:"Extensión de cuádriceps en máquina de placas", video:"ap1RsdCzZN4", cues:[], sets:[
+          {type:"aprox", target:"5 reps"},
+          {type:"top", target:"7 reps"},
+          {type:"bo", target:"10 reps"} ]},
+        { name:"Prensa", video:"U-zzH06qFXg", cues:[], sets:[
+          {type:"aprox", target:"5 reps"},
+          {type:"aprox", target:"5 reps"},
+          {type:"top", target:"8 reps"},
+          {type:"bo", target:"10–12 reps"} ]},
+        { name:"Elevaciones laterales con mancuernas", video:"lvUvnvXgh-Y", cues:[], sets:[
+          {type:"top", target:"12 reps"},
+          {type:"bo", target:"12 reps"} ]},
+        { name:"Abs crunch en máquina", video:"b6ONE9Rfgl8", cues:[], sets:[
+          {type:"top", target:"10 reps"},
+          {type:"bo", target:"10 reps"} ]}
       ]}
     ]
   }
@@ -726,6 +802,7 @@ function renderSession(){
     <div class="progress"><i id="bar"></i></div>`) + `
   ${warmHTML(day)}
   <div class="ex-list">${day.exercises.map((ex,ei)=>exCard(day,ex,ei)).join("")}</div>
+  ${warmHTML(day, "cool")}
   <div class="finish-bar"><button class="btn" id="finish">Terminar sesión</button></div>`;
 
   wireHeader();
@@ -747,10 +824,9 @@ function renderSession(){
     m.querySelectorAll(".m-pane").forEach(pn => pn.hidden = pn.dataset.pane !== t.dataset.m);
     t.dataset.m === "v" ? loadShort(m) : unloadShort(m);
   }));
-  const wb = document.getElementById("warm-ok");
-  if (wb) wb.onclick = () => { const k = day.id + "-warm"; log[k] = !log[k]; save();
+  app.querySelectorAll(".warm-ok").forEach(wb => wb.onclick = () => { const k = day.id + "-" + wb.dataset.kind; log[k] = !log[k]; save();
     wb.setAttribute("aria-pressed", String(!!log[k])); wb.textContent = log[k] ? "✓ Okay" : "Okay";
-    wb.closest(".warm").classList.toggle("done", !!log[k]); };
+    wb.closest(".warm").classList.toggle("done", !!log[k]); });
   const fb = document.getElementById("finish"); let armed = 0;
   fb.onclick = () => {
     const all = daySets(), done = all.filter(x => x.v.done).length, left = all.length - done;
@@ -766,12 +842,13 @@ function renderSession(){
 }
 
 /* Recordatorio de calentamiento y movilidad: pequeño, un solo "Okay" */
-function warmHTML(day){
-  if (!day.warm || !day.warm.length) return "";
-  const on = !!log[day.id + "-warm"];
-  return `<div class="warm${on ? " done" : ""}">
-    <div class="warm-t"><b>Calentamiento y movilidad</b>${day.warm.map(w => `${w.url ? `<a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.n)}</a>` : esc(w.n)} · ${esc(w.t)}`).join(" &nbsp;/&nbsp; ")}</div>
-    <button class="warm-ok" id="warm-ok" aria-pressed="${on}">${on ? "✓ Okay" : "Okay"}</button>
+function warmHTML(day, kind = "warm"){
+  const items = day[kind];
+  if (!items || !items.length) return "";
+  const on = !!log[day.id + "-" + kind];
+  return `<div class="warm${kind === "cool" ? " cool" : ""}${on ? " done" : ""}">
+    <div class="warm-t"><b>${kind === "cool" ? "Cardio para terminar" : "Calentamiento y movilidad"}</b>${items.map(w => `${w.url ? `<a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.n)}</a>` : esc(w.n)} · ${esc(w.t)}`).join(" &nbsp;/&nbsp; ")}</div>
+    <button class="warm-ok" data-kind="${kind}" aria-pressed="${on}">${on ? "✓ Okay" : "Okay"}</button>
   </div>`;
 }
 function mediaHTML(ex, id){
@@ -1283,6 +1360,7 @@ function showSummary(){
   const summaryText = () => {
     const L = [`CRISXLIFT · ${cl.name} (${code.slice(0,2)}-${code.slice(2)})`, `${day.label} · ${date}`];
     if (day.warm && day.warm.length) L.push(`Calentamiento y movilidad: ${log[day.id + "-warm"] ? "✓ hecho" : "no marcado"}`);
+    if (day.cool && day.cool.length) L.push(`Cardio final: ${log[day.id + "-cool"] ? "✓ hecho" : "no marcado"}`);
     day.exercises.forEach((ex,ei) => {
       L.push("", ex.name.toUpperCase());
       setsOf(day,ex,ei).forEach(o => {
@@ -1306,7 +1384,7 @@ function showSummary(){
     exercises: day.exercises.map((ex,ei) => ({ name: ex.name, sets: setsOf(day,ex,ei).map(o => {
       const s = o.s, v = log[o.k] || {};
       return { extra: o.extra || undefined, type: s.type, kg: v.kg ?? "", reps: v.reps ?? "", ...(ex.uni ? { kgL: v.kgL ?? "", repsL: v.repsL ?? "" } : {}), rpe: v.rpe ?? null, rir: v.rir ?? null, tRir: tRir(ex, s), done: !!v.done };
-    })})), warm: !!log[day.id + "-warm"]
+    })})), warm: !!log[day.id + "-warm"], cool: !!log[day.id + "-cool"]
   });
   saveHist(); keys.forEach(k => delete log[k]); save();
   const close = () => { sh.remove(); view = "home"; render(); window.scrollTo(0,0); };
