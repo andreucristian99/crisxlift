@@ -1665,9 +1665,15 @@ async function reportRender(paper){
   clone.style.cssText = "max-height:none;overflow:visible;border-radius:0;box-shadow:none;padding:0;gap:0;width:420px;display:block;";
   box.appendChild(clone); document.body.appendChild(box);
   try {
-    if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    const canvas = await html2canvas(clone, { scale: 2.5, backgroundColor: "#fbfaf7", logging: false });
-    const blob = await new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error("sin imagen")), "image/png"));
+    /* Nunca se queda colgado: si en 20 s no está, sale el aviso de hacer captura */
+    const limit = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("tiempo")), ms))]);
+    if (document.fonts && document.fonts.ready) await limit(document.fonts.ready, 3000).catch(() => {});
+    /* En iPhone, html2canvas espera a que carguen TODAS las fotos de la página (también las ocultas
+       de "Ver ejercicio", que nunca cargan) y se quedaba en "Preparando la imagen…".
+       Solo copiamos el informe: fuera fotos, vídeos e iframes que no son del informe. */
+    const skip = el => /^(IMG|IFRAME|VIDEO)$/.test(el.tagName) && !clone.contains(el);
+    const canvas = await limit(html2canvas(clone, { scale: 2.5, backgroundColor: "#fbfaf7", logging: false, ignoreElements: skip }), 20000);
+    const blob = await limit(new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error("sin imagen")), "image/png")), 10000);
     return { canvas, blob };
   } finally { box.remove(); }
 }
