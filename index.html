@@ -311,6 +311,8 @@ button{cursor:pointer}
 .rp-who b{display:block;font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;line-height:1}
 .rp-who span{display:block;font-size:10.5px;color:#c9cfe8;margin-top:3px}
 .rp-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.congrats{background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:900;font-size:22px;line-height:1.05;text-transform:uppercase;text-align:center;padding:14px 12px;border-radius:14px}
+.rp-congrats{background:#ff8a3d;color:#1a2247;font-family:var(--display);font-weight:900;font-size:17px;line-height:1.1;text-transform:uppercase;text-align:center;padding:10px;border-radius:8px}
 .rp-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #e2e4ee;border-radius:10px;overflow:hidden}
 .rp-stat{padding:8px 10px;border-left:1px solid #e2e4ee;min-width:0}
 .rp-stat:first-child{border-left:0}
@@ -1551,6 +1553,7 @@ function showSummary(){
   sh.className = "sheet";
   sh.innerHTML = `<div class="sheet-in" role="dialog" aria-label="Resumen de la sesión">
     <h2>Sesión guardada</h2>
+    <div class="congrats">¡CRISTIAN TE FELICITA POR HABER CUMPLIDO UN DÍA MÁS!</div>
     ${feedbackHTML(FB)}
     <div class="stats">
       <div class="stat"><small>Series hechas</small><strong>${done.length}/${all.length}</strong></div>
@@ -1562,6 +1565,7 @@ function showSummary(){
         <div class="rp-who"><b>${esc(cl.name)}</b><span>${esc(code.slice(0,2)+"-"+code.slice(2))} · ${esc(cl.block || "")}</span><span>${esc(day.label)} · ${esc(date)}</span></div>
       </div>
       <div class="rp-body">
+        <div class="rp-congrats">¡CRISTIAN TE FELICITA POR HABER CUMPLIDO UN DÍA MÁS!</div>
         <div class="rp-stats">
           <div class="rp-stat"><small>Series</small><strong>${done.length}/${all.length}</strong></div>
           <div class="rp-stat"><small>Volumen</small><strong>${fmt(vol)} kg</strong></div>
