@@ -280,6 +280,13 @@ button{cursor:pointer}
 .paper td.hi{color:#b3261e;font-weight:600}
 .paper .legend{font-size:10.5px;color:#4a5280}
 .add-aprox{align-self:flex-start;background:none;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.ex-note{display:flex;flex-direction:column;gap:6px}
+.note-b{align-self:flex-start;background:none;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.ex-note label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ex-note textarea{width:100%;min-height:64px;resize:vertical;background:var(--bg);color:var(--fg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:16px;line-height:1.4}
+.ex-note textarea:focus{border-color:var(--accent);outline:none}
+.rp-note{margin:2px 0 0;padding:6px 8px;border-left:3px solid #ff8a3d;background:#f3efe7;font-size:11px;line-height:1.4;color:#1a2247;white-space:pre-wrap}
+.h-note{margin:4px 0 0;font-size:13px;color:var(--muted);white-space:pre-wrap}
 .del-x{margin-left:auto;background:none;border:0;padding:4px 2px;font-size:12px;color:var(--warn);text-decoration:underline;text-underline-offset:2px}
 .undo{background:none;border:0;padding:6px;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 .sides{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border-radius:10px;padding:3px}
@@ -1036,6 +1043,12 @@ function renderSession(){
     b.setAttribute("aria-expanded", String(!p.hidden)); b.textContent = p.hidden ? "Ver ejercicio" : "Ocultar";
   });
   app.querySelectorAll(".set").forEach(el => wireSet(el));
+  app.querySelectorAll(".ex-note").forEach(w => {
+    const k = noteKey(day, +w.dataset.ei), b = w.querySelector(".note-b"), box = w.querySelector("div"), ta = w.querySelector("textarea");
+    b.onclick = () => { b.hidden = true; box.hidden = false; ta.focus(); };
+    ta.addEventListener("input", () => { if (ta.value.trim()) log[k] = ta.value; else delete log[k]; save(); });
+    ta.addEventListener("blur", () => { if (!ta.value.trim()){ box.hidden = true; b.hidden = false; } });
+  });
   const keepScroll = fn => { const y = window.scrollY; fn(); save(); renderSession(); window.scrollTo(0, y); };
   app.querySelectorAll(".add-aprox").forEach(b => b.onclick = () => keepScroll(() => {
     const kn = `${day.id}-${b.dataset.ei}-xn`; log[kn] = (+log[kn] || 0) + 1; }));
@@ -1165,9 +1178,22 @@ function exCard(day, ex, ei){
       ${mediaHTML(ex, `${day.id}-${ei}`)}
       ${ex.cues.map(c=>`<div>• ${esc(c)}</div>`).join("")}
     </div>
-    ${(sets => sets.map(o => setRow(day,ex,ei,o, o.extra && o.xi === sets.filter(x => x.extra).length - 1)).join(""))(setsOf(day,ex,ei))}
     <button class="add-aprox" data-ei="${ei}">+ Aproximación</button>
+    ${(sets => sets.map(o => setRow(day,ex,ei,o, o.extra && o.xi === sets.filter(x => x.extra).length - 1)).join(""))(setsOf(day,ex,ei))}
+    ${noteHTML(day, ei)}
   </article>`;
+}
+
+/* Nota del cliente por ejercicio: se abre con un toque y se guarda sola */
+const noteKey = (day, ei) => `${day.id}-${ei}-note`;
+const noteOf = (day, ei) => { const n = log[noteKey(day, ei)]; return typeof n === "string" ? n.trim() : ""; };
+function noteHTML(day, ei){
+  const v = log[noteKey(day, ei)] || "", id = `note-${day.id}-${ei}`;
+  return `<div class="ex-note" data-ei="${ei}">
+    <button class="note-b"${v ? " hidden" : ""} aria-controls="${id}">📝 Añadir nota</button>
+    <div${v ? "" : " hidden"}><label for="${id}">Nota para Cris</label>
+    <textarea id="${id}" maxlength="400" placeholder="Ej: me molestó un poco el hombro, la máquina estaba ocupada…">${esc(v)}</textarea></div>
+  </div>`;
 }
 
 function setRow(day, ex, ei, o, canDel){
@@ -1439,7 +1465,7 @@ function renderHistory(){
         <span class="s-date">${e.imported ? esc(e.week) + " · desde tu Excel" : esc(date) + " · " + done + "/" + tot + " series"}</span>
       </summary>
       <div class="sess-body">${e.exercises.map(ex => `<div><h4>${esc(ex.name)}</h4><table><thead><tr><th>Serie</th><th>Kg</th><th>Reps</th><th>RPE</th><th>Obj.</th></tr></thead><tbody>${
-        ex.sets.map(s => `<tr><td>${TYPE_LABEL[s.type]}</td>${s.kgL !== undefined ? cell(hasVal(s.kg) || hasVal(s.kgL) ? `D ${hasVal(s.kg) ? fmt(s.kg) : "—"} / I ${hasVal(s.kgL) ? fmt(s.kgL) : "—"}` : "") : cell(s.kg === "" ? "" : fmt(s.kg))}${s.kgL !== undefined ? cell(hasVal(s.reps) || hasVal(s.repsL) ? `${s.reps || "—"} / ${s.repsL || "—"}` : "") : cell(s.reps)}${cell(s.rpe)}${cell(s.tRir != null ? "RIR " + s.tRir : s.rir)}</tr>`).join("")}</tbody></table></div>`).join("")}
+        ex.sets.map(s => `<tr><td>${TYPE_LABEL[s.type]}</td>${s.kgL !== undefined ? cell(hasVal(s.kg) || hasVal(s.kgL) ? `D ${hasVal(s.kg) ? fmt(s.kg) : "—"} / I ${hasVal(s.kgL) ? fmt(s.kgL) : "—"}` : "") : cell(s.kg === "" ? "" : fmt(s.kg))}${s.kgL !== undefined ? cell(hasVal(s.reps) || hasVal(s.repsL) ? `${s.reps || "—"} / ${s.repsL || "—"}` : "") : cell(s.reps)}${cell(s.rpe)}${cell(s.tRir != null ? "RIR " + s.tRir : s.rir)}</tr>`).join("")}</tbody></table>${ex.note ? `<p class="h-note">📝 ${esc(ex.note)}</p>` : ""}</div>`).join("")}
         ${e.imported ? "" : `<div class="s-del" data-sid="${esc(String(e.id || e.ts))}"><button class="s-del-b" data-del="ask">Borrar esta sesión</button></div>`}
       </div></details>`;
   }).join("") : `<div class="empty">Aún no has guardado ninguna sesión.</div>`;
@@ -1546,7 +1572,7 @@ function showSummary(){
       const kgv = ex.uni ? (hasVal(v.kg) || hasVal(v.kgL) ? `D ${hasVal(v.kg) ? fmt(+v.kg) : "—"} / I ${hasVal(v.kgL) ? fmt(+v.kgL) : "—"}` : "") : (v.kg == null || v.kg === "" ? "" : fmt(+v.kg));
       const repv = ex.uni ? (hasVal(v.reps) || hasVal(v.repsL) ? `${v.reps || "—"} / ${v.repsL || "—"}` : "") : v.reps;
       return `<tr${has ? "" : ` class="skip"`}><td><span class="rp-t ${s.type}">${TYPE_LABEL[s.type]}${o.extra ? " +" : ""}</span></td>${c(kgv)}${c(repv)}${c(v.rpe)}${c(tr != null ? tr : "")}${rd ? `<td class="r"><span class="rp-pill ${rd.cls}">${esc(rd.txt)}</span></td>` : `<td class="miss r">—</td>`}</tr>`; }).join("")
-  }</tbody></table></section>`).join("");
+  }</tbody></table>${noteOf(day, ei) ? `<p class="rp-note"><b>Nota:</b> ${esc(noteOf(day, ei))}</p>` : ""}</section>`).join("");
   const warmDone = !!log[day.id + "-warm"], hasWarm = !!(day.warm && day.warm.length);
   const progHTML = FB.length ? `<div class="rp-prog"><div class="rp-h">Progreso · top set vs. última vez</div>${FB.map(x => `<div class="rp-pr ${x.cls}"><span>${esc(x.name)}</span><em>${esc(x.badge)}</em></div>`).join("")}</div>` : "";
   const sh = document.createElement("div");
@@ -1604,6 +1630,7 @@ function showSummary(){
         const kgr = has ? kgx(v, ex.uni) : "sin kg/reps";
         L.push(`- ${TYPE_LABEL[st.type]}${o.extra ? " extra" : ""}: ${kgr}${v.rpe != null ? ` · RPE ${v.rpe}` : ""}${tr != null ? ` (obj. RIR ${tr}${rd ? ` → ${rd.txt}` : ""})` : ""}${v.done ? "" : " · no marcada"}`);
       });
+      if (noteOf(day, ei)) L.push(`📝 Nota: ${noteOf(day, ei)}`);
     });
     if (FB.length){ L.push("", "PROGRESO (top set vs. última vez)"); FB.forEach(x => L.push(`${{up:"✅",new:"⭐",same:"➖",mid:"🔸"}[x.cls]} ${x.name}: ${x.badge}`)); }
     L.push("", `${done.length}/${all.length} series · Volumen efectivo ${fmt(vol)} kg`);
@@ -1615,7 +1642,7 @@ function showSummary(){
   const keys = Object.keys(log).filter(k => k === day.id + "-warm" || k.startsWith(day.id + "-"));
   const snap = {}; keys.forEach(k => snap[k] = log[k]);
   hist.push({ id: entryId, ts: Date.now(), dayId: day.id, dayLabel: day.label,
-    exercises: day.exercises.map((ex,ei) => ({ name: ex.name, sets: setsOf(day,ex,ei).map(o => {
+    exercises: day.exercises.map((ex,ei) => ({ name: ex.name, note: noteOf(day, ei) || undefined, sets: setsOf(day,ex,ei).map(o => {
       const s = o.s, v = log[o.k] || {};
       return { extra: o.extra || undefined, type: s.type, kg: v.kg ?? "", reps: v.reps ?? "", ...(ex.uni ? { kgL: v.kgL ?? "", repsL: v.repsL ?? "" } : {}), rpe: v.rpe ?? null, rir: v.rir ?? null, tRir: tRir(ex, s), done: !!v.done };
     })})), warm: !!log[day.id + "-warm"], cool: !!log[day.id + "-cool"]
