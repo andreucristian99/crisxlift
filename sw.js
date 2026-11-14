@@ -1,6 +1,6 @@
 /* Crisxlift: guarda la app para abrirla rápido y sin conexión.
    Siempre intenta cargar la versión nueva primero; si no hay internet, usa la guardada. */
-const CACHE = "crisxlift-v29";
+const CACHE = "crisxlift-v30";
 const FILES = ["./", "index.html", "manifest.webmanifest", "vendor/html2canvas.min.js", "vendor/jspdf.umd.min.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png", "icons/favicon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });

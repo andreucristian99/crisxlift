@@ -706,10 +706,10 @@ function entryVol(e){
 function setsOf(day, ex, ei){
   const nX = +log[`${day.id}-${ei}-xn`] || 0, out = [], cnt = {};
   const push = (s, k, extra, xi) => { cnt[s.type] = (cnt[s.type] || 0) + 1; out.push({ s, k, extra, xi, ord: cnt[s.type] - 1 }); };
-  let lastA = -1; ex.sets.forEach((s,i) => { if (s.type === "aprox") lastA = i; });
-  const addX = () => { for (let x = 0; x < nX; x++) push({ type:"aprox", target:"Extra" }, `${day.id}-${ei}-x${x}`, true, x); };
-  if (lastA < 0) addX();
-  ex.sets.forEach((s,si) => { push(s, setKey(day.id, ei, si), false); if (si === lastA) addX(); });
+  /* Las aproximaciones las añade el atleta con "+ Aproximación" (como en CristianEntrenador).
+     Las que venían pautadas en la rutina no se muestran; las claves de las demás series no cambian. */
+  for (let x = 0; x < nX; x++) push({ type:"aprox", target:"Extra" }, `${day.id}-${ei}-x${x}`, true, x);
+  ex.sets.forEach((s,si) => { if (s.type !== "aprox") push(s, setKey(day.id, ei, si), false); });
   return out;
 }
 /* "Última vez": misma serie (mismo tipo y mismo orden) del último entreno de ese día */
