@@ -619,8 +619,12 @@ async function autoSend(sh, e, rep, base, who){
   let ok = false;
   try { ok = await sendReport(e, rep.canvas, base); } catch(err){}
   st.className = "send-st " + (ok ? "ok" : "wait");
+  if (!ok){
+    imgBtn.className = "btn"; imgBtn.textContent = `📤 Plan B: mandársela a ${who} por WhatsApp`;
+    const alt = sh.querySelector("#imgalt"); if (alt) alt.hidden = false;
+  }
   st.textContent = ok ? `✓ Tranqui, ${who} ya tiene guardado tu informe. Ahora toca descansar y comer bien, del resto se encarga Cris 💪`
-    : `El informe queda guardado y se le enviará solo a ${who} en cuanto haya conexión ✓`;
+    : `No se pudo enviar ahora. Se volverá a intentar sola, pero para asegurarte usa el plan B de aquí abajo 👇`;
 }
 /* Primera vez con esta versión: el cliente ya tenía su código guardado pero no su rutina */
 function renderLoading(c){
@@ -1425,6 +1429,7 @@ function showSummary(){
     <div class="share-row">
       <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
       <button class="btn" id="img" disabled>Preparando la imagen…</button>
+      <button class="undo" id="imgalt" hidden>¿No te deja compartir? Ver imagen para guardarla</button>
       <p class="note" id="share-note">Ya está guardada en tu historial ✓ El informe le llega solo a Cris; compartirlo es opcional.</p>
       <button class="ghost" id="close">Listo</button>
       <button class="undo" id="undo">¿Terminaste sin querer? Deshacer y volver a la sesión</button>
@@ -1474,6 +1479,7 @@ function showSummary(){
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, E, rep, base, "Cris");
   }).catch(() => {
     const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
@@ -1598,6 +1604,7 @@ function showSavedReport(e){
     <div class="share-row">
       <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
       <button class="btn" id="img" disabled>Preparando la imagen…</button>
+      <button class="undo" id="imgalt" hidden>¿No te deja compartir? Ver imagen para guardarla</button>
       <p class="note" id="share-note">Es el mismo informe de ese día.</p>
       <button class="ghost" id="close">Listo</button>
     </div>
@@ -1613,6 +1620,7 @@ function showSavedReport(e){
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, e, rep, base, "Cris");
   }).catch(() => {
     const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
