@@ -296,6 +296,9 @@ button{cursor:pointer}
 .wk-tab td.num{font-weight:800;color:var(--accent)}
 .wk-note{font-size:12px;color:var(--muted);margin:6px 0 0}
 .del-x{margin-left:auto;background:none;border:0;padding:4px 2px;font-size:12px;color:var(--warn);text-decoration:underline;text-underline-offset:2px}
+.send-st{margin:0;padding:12px 14px;border-radius:12px;background:#f1efe9;font-weight:700;font-size:15px;text-align:center}
+.send-st.ok{background:#e4f3e8;color:#1d6a35}
+.send-st.wait{background:#fff3e2;color:#8a5200}
 .undo{background:none;border:0;padding:6px;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 .sides{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border-radius:10px;padding:3px}
 .side{background:none;border:0;border-radius:8px;padding:7px 4px;font-size:13px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
@@ -564,6 +567,61 @@ function trackDeleted(){
 }
 window.addEventListener("online", () => queueSync(500));
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") queueSync(800); });
+/* ---------- Informe a la carpeta de Drive de Cristian (sin compartir nada a mano) ----------
+   Al terminar, la imagen del informe se sube sola. Si no hay internet en el gimnasio,
+   se guarda en el móvil y se manda sola en cuanto vuelva la conexión. */
+const sentKey = c => P + "-photosent-" + c;
+const photoSent = e => code && (store.get(sentKey(code)) || []).includes(sid(e));
+function markPhotoSent(c, id){ const s = store.get(sentKey(c)) || []; if (!s.includes(id)){ s.push(id); store.set(sentKey(c), s.slice(-200)); } }
+function reportJpeg(canvas){
+  /* Más ligera para subirla rápido: máximo 1000 px de ancho */
+  const k = Math.min(1, 1000 / canvas.width);
+  let cv = canvas;
+  if (k < 1){ cv = document.createElement("canvas"); cv.width = Math.round(canvas.width * k); cv.height = Math.round(canvas.height * k);
+    const g = cv.getContext("2d"); g.fillStyle = "#fbfaf7"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(canvas, 0, 0, cv.width, cv.height); }
+  return cv.toDataURL("image/jpeg", 0.85).split(",")[1];
+}
+async function postPhoto(it){
+  try { const r = await api({ action: "photo", code: it.code, id: it.id, name: it.name, data: it.data }); return !!(r && r.ok); }
+  catch(e){ return false; }
+}
+/* true = le llegó a Cristian; false = queda en cola y se manda sola más tarde */
+async function sendReport(e, canvas, base){
+  const it = { code, id: sid(e), name: base + ".jpg", data: reportJpeg(canvas) };
+  if (await postPhoto(it)){ markPhotoSent(it.code, it.id); return true; }
+  const q = (store.get(P + "-photoq") || []).filter(x => x.id !== it.id); q.push(it);
+  while (q.length > 4) q.shift();
+  store.set(P + "-photoq", q);
+  return false;
+}
+let flushing = false;
+async function flushPhotos(){
+  const q = store.get(P + "-photoq") || [];
+  if (!q.length || flushing || !navigator.onLine) return;
+  flushing = true;
+  try {
+    for (const it of q){
+      if (!(await postPhoto(it))) break;
+      markPhotoSent(it.code, it.id);
+      store.set(P + "-photoq", (store.get(P + "-photoq") || []).filter(x => x.id !== it.id));
+    }
+  } finally { flushing = false; }
+}
+window.addEventListener("online", () => setTimeout(flushPhotos, 1500));
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") setTimeout(flushPhotos, 2000); });
+setTimeout(flushPhotos, 4000);
+/* Pinta el estado del envío en el resumen y deja "Compartir" solo como opción extra */
+async function autoSend(sh, e, rep, base, who){
+  const st = sh.querySelector("#send-st"), imgBtn = sh.querySelector("#img");
+  imgBtn.className = "ghost"; imgBtn.textContent = "📤 Compartir también por WhatsApp (opcional)";
+  if (photoSent(e)){ st.className = "send-st ok"; st.textContent = `✓ Este informe ya le llegó a ${who}`; return; }
+  st.className = "send-st"; st.textContent = `Enviando el informe a ${who}…`;
+  let ok = false;
+  try { ok = await sendReport(e, rep.canvas, base); } catch(err){}
+  st.className = "send-st " + (ok ? "ok" : "wait");
+  st.textContent = ok ? `✓ Tranqui, ${who} ya tiene guardado tu informe. Ahora toca descansar y comer bien, del resto se encarga Cris 💪`
+    : `El informe queda guardado y se le enviará solo a ${who} en cuanto haya conexión ✓`;
+}
 /* Primera vez con esta versión: el cliente ya tenía su código guardado pero no su rutina */
 function renderLoading(c){
   app.innerHTML = `<section class="login"><div><div class="brand">Crisx<span>lift</span></div>
@@ -1365,8 +1423,9 @@ function showSummary(){
     </div>
     ${entryPaper(E)}
     <div class="share-row">
+      <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
       <button class="btn" id="img" disabled>Preparando la imagen…</button>
-      <p class="note" id="share-note">Ya está guardada en tu historial ✓ Solo falta enviársela a Cris.</p>
+      <p class="note" id="share-note">Ya está guardada en tu historial ✓ El informe le llega solo a Cris; compartirlo es opcional.</p>
       <button class="ghost" id="close">Listo</button>
       <button class="undo" id="undo">¿Terminaste sin querer? Deshacer y volver a la sesión</button>
     </div>
@@ -1415,7 +1474,9 @@ function showSummary(){
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    autoSend(sh, E, rep, base, "Cris");
   }).catch(() => {
+    const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
     imgBtn.textContent = "No se pudo crear la imagen"; note.textContent = "Haz una captura de pantalla del informe y mándasela a Cris.";
   });
   imgBtn.onclick = async () => {
@@ -1535,8 +1596,9 @@ function showSavedReport(e){
     <h2>Informe de la sesión</h2>
     ${entryPaper(e)}
     <div class="share-row">
+      <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
       <button class="btn" id="img" disabled>Preparando la imagen…</button>
-      <p class="note" id="share-note">Es el mismo informe de ese día. Compártelo y mándaselo a Cris.</p>
+      <p class="note" id="share-note">Es el mismo informe de ese día.</p>
       <button class="ghost" id="close">Listo</button>
     </div>
   </div>`;
@@ -1551,7 +1613,9 @@ function showSavedReport(e){
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    autoSend(sh, e, rep, base, "Cris");
   }).catch(() => {
+    const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
     imgBtn.textContent = "No se pudo crear la imagen"; note.textContent = "Haz una captura de pantalla del informe y mándasela a Cris.";
   });
   imgBtn.onclick = async () => {
