@@ -1482,8 +1482,9 @@ function showSummary(){
     sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, E, rep, base, "Cris");
   }).catch(() => {
-    const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
-    imgBtn.textContent = "No se pudo crear la imagen"; note.textContent = "Haz una captura de pantalla del informe y mándasela a Cris.";
+    const st = sh.querySelector("#send-st"); st.className = "send-st ok";
+    st.textContent = "Tranqui: tus series ya quedaron guardadas y Cris las ve igual en su hoja 💪";
+    imgBtn.hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
   });
   imgBtn.onclick = async () => {
     if (!rep) return;
@@ -1623,8 +1624,9 @@ function showSavedReport(e){
     sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, e, rep, base, "Cris");
   }).catch(() => {
-    const st = sh.querySelector("#send-st"); st.className = "send-st wait"; st.textContent = "No se pudo crear la imagen";
-    imgBtn.textContent = "No se pudo crear la imagen"; note.textContent = "Haz una captura de pantalla del informe y mándasela a Cris.";
+    const st = sh.querySelector("#send-st"); st.className = "send-st ok";
+    st.textContent = "Tranqui: tus series ya quedaron guardadas y Cris las ve igual en su hoja 💪";
+    imgBtn.hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
   });
   imgBtn.onclick = async () => {
     if (!rep) return;
@@ -1644,7 +1646,7 @@ async function reportRender(paper){
   clone.style.cssText = "max-height:none;overflow:visible;border-radius:0;box-shadow:none;padding:0;gap:0;width:420px;display:block;";
   box.appendChild(clone); document.body.appendChild(box);
   try {
-    /* Nunca se queda colgado: si en 20 s no está, sale el aviso de hacer captura */
+    /* Nunca se queda colgado: si en 20 s no está, sale el aviso de que las series ya están guardadas */
     const limit = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("tiempo")), ms))]);
     if (document.fonts && document.fonts.ready) await limit(document.fonts.ready, 3000).catch(() => {});
     /* En iPhone, html2canvas espera a que carguen TODAS las fotos de la página (también las ocultas
@@ -1681,7 +1683,7 @@ async function showReportImage(blob, why){
   v.className = "imgview"; v.setAttribute("role", "dialog"); v.setAttribute("aria-label", "Imagen del informe");
   v.innerHTML = `<p><b>Mantén pulsada la imagen</b> y elige «Guardar en Fotos» o «Descargar imagen». Luego mándasela a Cris por WhatsApp desde tu galería.</p>
     <img alt="Informe de la sesión" src="${url}">
-    <p style="font-size:13px;color:var(--muted)">¿No te deja guardarla? Haz una captura de pantalla de la imagen (o captura con desplazamiento) y mándasela a Cris.</p>
+    <p style="font-size:13px;color:var(--muted)">¿No te deja guardarla? Tranqui: tus series ya quedaron guardadas y Cris las ve igual en su hoja.</p>
     <button class="ghost" id="imgview-close">Cerrar</button>
 `;
   document.body.appendChild(v);
