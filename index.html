@@ -1426,7 +1426,7 @@ function editSession(e){
     W.forEach(ex => { if (!ex.check) ex.sets.forEach(s => { if ([s.kg, s.reps, s.kgL, s.repsL].some(hasVal)) s.done = true; }); });
     close();
     if (JSON.stringify(W) === JSON.stringify(e.exercises)){ toast("No había nada que cambiar"); return; }
-    e.exercises = W; e.edited = Date.now();
+    e.exercises = W; e.edited = Date.now(); e.fb = entryFb(e);
     /* Se vuelve a subir a la hoja (misma fila) y el informe corregido se manda otra vez */
     store.set(P + "-synced-" + code, (store.get(P + "-synced-" + code) || []).filter(id => id !== sid(e)));
     store.set(sentKey(code), (store.get(sentKey(code)) || []).filter(id => id !== sid(e)));
@@ -1435,6 +1435,39 @@ function editSession(e){
     toast("Series corregidas ✓");
     showSavedReport(e);
   };
+}
+
+/* Recalcula el progreso (top set vs. la última vez que hizo ese día) de una sesión guardada,
+   con el mismo criterio que al terminar el entreno */
+function entryFb(e){
+  const out = [];
+  e.exercises.forEach((ex, ei) => {
+    if (ex.check) return;
+    const v0 = ex.sets.find(x => x.type === "top"); if (!v0) return;
+    const ro = repsOnly(ex), uni = v0.kgL !== undefined;
+    const ok = (s, kf, rf) => s && s.done && hasVal(s[rf]) && (hasVal(s[kf]) || ro);
+    let l = null;
+    for (let i = hist.length - 1; i >= 0; i--){
+      const p = hist[i]; if (p === e || p.dayId !== e.dayId || p.ts >= e.ts) continue;
+      const px = p.exercises[ei]; if (!px || px.name !== ex.name) continue;
+      const s = px.sets.find(x => x.type === "top");
+      if (ok(s, "kg", "reps") || (s && s.done && hasVal(s.kgL) && hasVal(s.repsL))){ l = s; break; }
+    }
+    const def = rpDef(e, ei, ex), tmin = parseInt(String(rpTarget(v0, def))) || null;
+    const num = (o, kf, rf) => ({ kg: ro && hasVal(o[rf]) ? 0 : +o[kf], reps: parseInt(o[rf]) });
+    const sides = uni ? [["D","kg","reps"],["I","kgL","repsL"]] : [["","kg","reps"]];
+    const parts = sides.map(([lab, kf, rf]) => {
+      if (!hasVal(v0[rf]) || (!ro && !hasVal(v0[kf]))) return null;
+      if (!l || !hasVal(l[rf]) || (!ro && !hasVal(l[kf]))) return { lab, cls:"new", badge:"Primera marca", note:"Ya tienes tu referencia para la próxima." };
+      const a = num(v0, kf, rf), b = num(l, kf, rf);
+      return { lab, ...compareTop(a.kg, a.reps, b.kg, b.reps, tmin) };
+    }).filter(Boolean);
+    if (!parts.length) return;
+    const rank = { up:3, new:2, same:1, mid:0 };
+    const main = parts.reduce((a,b) => rank[b.cls] > rank[a.cls] ? b : a);
+    out.push({ name: ex.name, cls: main.cls, note: main.note, badge: parts.map(x => (x.lab ? x.lab + " " : "") + x.badge).join(" · ") });
+  });
+  return out;
 }
 
 /* ---------- Resumen ---------- */
