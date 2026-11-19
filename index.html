@@ -856,16 +856,11 @@ function renderSession(){
   app.querySelectorAll(".warm-ok").forEach(wb => wb.onclick = () => { const k = day.id + "-" + wb.dataset.kind; log[k] = !log[k]; save();
     wb.setAttribute("aria-pressed", String(!!log[k])); wb.textContent = log[k] ? "✓ Okay" : "Okay";
     wb.closest(".warm").classList.toggle("done", !!log[k]); });
-  const fb = document.getElementById("finish"); let armed = 0;
+  const fb = document.getElementById("finish");
   fb.onclick = () => {
     const all = daySets(), done = all.filter(x => x.v.done).length, left = all.length - done;
     if (!done){ toast("Marca al menos una serie con ✓ para terminar"); return; }
-    if (left > 0 && Date.now() - armed > 4000){
-      armed = Date.now(); fb.textContent = `Te faltan ${left} series · toca otra vez para terminar`;
-      setTimeout(() => { if (Date.now() - armed >= 4000) fb.textContent = "Terminar sesión"; }, 4100);
-      return;
-    }
-    showSummary();
+    confirmFinish(left);
   };
   updateBar();
 }
@@ -1388,6 +1383,28 @@ function feedbackHTML(fb){
       <span class="fb-i" aria-hidden="true">${ic[x.cls]}</span>
       <span class="fb-t"><b>${esc(x.name)}</b><small>${esc(x.note)}</small></span>
       <span class="fb-b">${esc(x.badge)}</span></div>`).join("")}<p class="fb-f">Comparado con tu top set de la última vez. — Cris</p></div>`;
+}
+/* Pregunta de seguridad antes de terminar: así el entreno no se acaba solo por un toque sin querer */
+function confirmFinish(left){
+  if (document.querySelector(".confirm-end")) return;
+  const c = document.createElement("div");
+  c.className = "sheet confirm-end";
+  c.innerHTML = `<div class="sheet-in" role="dialog" aria-label="Terminar sesión">
+    <h2>¿Seguro que quieres terminar esta sesión?</h2>
+    <p class="note" style="font-size:15px">${left > 0 ? `Todavía te ${left === 1 ? "falta 1 serie" : `faltan ${left} series`} por marcar. ` : ""}Al terminar se guarda el entreno y se le envía el informe a Cris.</p>
+    <div class="share-row">
+      <button class="btn" id="ce-keep">No, sigo entrenando</button>
+      <button class="ghost" id="ce-end">Sí, terminar sesión</button>
+    </div>
+  </div>`;
+  document.body.appendChild(c);
+  const close = () => c.remove();
+  c.querySelector("#ce-keep").onclick = close;
+  c.addEventListener("click", ev => { if (ev.target === c) close(); });
+  /* El botón de terminar no responde hasta medio segundo después: evita el doble toque accidental */
+  const end = c.querySelector("#ce-end"); end.disabled = true;
+  setTimeout(() => { end.disabled = false; }, 600);
+  end.onclick = () => { close(); showSummary(); };
 }
 function showSummary(){
   const cl = CLIENTS[code], day = cl.days[dayIdx];
