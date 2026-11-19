@@ -876,8 +876,11 @@ function warmHTML(day, kind = "warm"){
     <button class="warm-ok" data-kind="${kind}" aria-pressed="${on}">${on ? "✓ Okay" : "Okay"}</button>
   </div>`;
 }
+/* Fotos de máquinas de VivaGym: se usan las mismas que en la app CristianEntrenador ("img": "fotos/...") */
+const VIVA_FOTOS = "https://andreucristian99.github.io/cristianentrenador/";
+const photoSrc = ex => ex.img ? (/^https?:/.test(ex.img) ? ex.img : VIVA_FOTOS + ex.img) : (ex.photo && PHOTOS[ex.photo]) || "";
 function mediaHTML(ex, id){
-  const hasP = ex.photo && PHOTOS[ex.photo], hasV = !!(ex.video || ex.loom);
+  const hasP = !!photoSrc(ex), hasV = !!(ex.video || ex.loom);
   const ref = ex.ref ? `<a class="yt-link" href="${esc(ex.ref.url)}" target="_blank" rel="noopener">📎 ${esc(ex.ref.label)} ↗</a>` : "";
   if (!hasP && !hasV) return ref ? `<div class="media">${ref}</div>` : `<div class="vid">Aquí irá tu foto y vídeo del ejercicio</div>`;
   const first = hasV ? "v" : "p";
@@ -893,7 +896,7 @@ function mediaHTML(ex, id){
     ${hasP && hasV ? `<div class="m-tabs"><button class="m-tab" data-m="v" aria-pressed="${first==="v"}">▶ Vídeo</button><button class="m-tab" data-m="p" aria-pressed="${first==="p"}">📷 Máquina</button></div>` : ""}
     ${hasV ? `<div class="m-pane" data-pane="v"${first==="v"?"":" hidden"}>${ex.vlabel ? `<div class="v-lab">${esc(ex.vlabel)}</div>` : ""}<div class="short${wide ? " wide" : ""}" data-src="${esc(vSrc)}"></div>
       <a class="yt-link" href="${esc(vOpen)}" target="_blank" rel="noopener">¿No carga? Ábrelo ${ex.loom ? "en Loom" : "en YouTube"} ↗</a>${ref}</div>` : ""}
-    ${hasP ? `<div class="m-pane" data-pane="p"${first==="p"?"":" hidden"}><img class="m-photo" src="${PHOTOS[ex.photo]}" alt="Máquina de ${esc(ex.name)}" loading="lazy"></div>` : ""}
+    ${hasP ? `<div class="m-pane" data-pane="p"${first==="p"?"":" hidden"}><img class="m-photo" src="${esc(photoSrc(ex))}" alt="Máquina de ${esc(ex.name)}" loading="lazy"></div>` : ""}
   </div>`;
 }
 /* El vídeo solo se carga cuando se abre "Ver ejercicio" (ahorra datos) */
@@ -958,7 +961,7 @@ function setupPdf(day, ex, ei){
 }
 
 /* Sin vídeo, foto, enlace ni indicaciones no hay nada que enseñar: se oculta "Ver ejercicio" */
-const hasInfo = ex => !!(ex.video || ex.loom || (ex.photo && PHOTOS[ex.photo]) || ex.ref || (ex.cues && ex.cues.length));
+const hasInfo = ex => !!(ex.video || ex.loom || photoSrc(ex) || ex.ref || (ex.cues && ex.cues.length));
 function exCard(day, ex, ei){
   return `<article class="ex">
     <div class="ex-head">
