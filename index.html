@@ -280,6 +280,9 @@ button{cursor:pointer}
 .paper td.lo{color:#c25a12;font-weight:600}
 .paper td.hi{color:#b3261e;font-weight:600}
 .paper .legend{font-size:10.5px;color:#4a5280}
+.opt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.opt-b{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;background:none;color:var(--fg)}
+.opt-b[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .add-aprox{align-self:flex-start;background:none;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
 .ex-note{display:flex;flex-direction:column;gap:6px}
 .note-b{align-self:flex-start;background:none;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
@@ -775,10 +778,16 @@ function setsOf(day, ex, ei){
   ex.sets.forEach((s,si) => { if (s.type !== "aprox") push(s, setKey(day.id, ei, si), false); });
   return out;
 }
+/* Opción A / B por ejercicio (por si la máquina está ocupada o no existe): "alt" en la rutina */
+const optKey = (day, ei) => `${day.id}-${ei}-opt`;
+const exAt = (day, ex, ei) => ex && ex.alt && log[optKey(day, ei)] === "b" ? Object.assign({}, ex, ex.alt, { isB: true }) : ex;
+const exs = day => day.exercises.map((ex, ei) => exAt(day, ex, ei));
 /* "Última vez": misma serie (mismo tipo y mismo orden) del último entreno de ese día */
 function lastFor(dayId, ei, type, ord){
+  const cd = CLIENTS[code].days.find(d => d.id === dayId), base = cd && cd.exercises[ei], nm = base && exAt(cd, base, ei).name;
   for (let i = hist.length - 1; i >= 0; i--){
     const e = hist[i]; if (e.dayId !== dayId) continue;
+    if (base && base.alt && e.exercises[ei] && e.exercises[ei].name !== nm) continue;
     const s = e.exercises[ei] && e.exercises[ei].sets.filter(x => x.type === type)[ord];
     const ro = repsOnly(e.exercises[ei]);
     if (s && s.done && (((s.kg !== "" || ro) && s.reps !== "") || (hasVal(s.kgL) && hasVal(s.repsL)))) return { ts: e.ts, kg: s.kg, reps: s.reps, kgL: s.kgL, repsL: s.repsL, rir: s.rir, rpe: s.rpe };
@@ -825,7 +834,7 @@ function renderSession(){
     <div class="days">${cl.days.map((d,i)=>`<button class="day" data-day="${i}" aria-pressed="${i===dayIdx}">${esc(d.label)}</button>`).join("")}</div>
     <div class="progress"><i id="bar"></i></div>`) + `
   ${warmHTML(day)}
-  <div class="ex-list">${day.exercises.map((ex,ei)=>exCard(day,ex,ei)).join("")}</div>
+  <div class="ex-list">${exs(day).map((ex,ei)=>exCard(day,ex,ei)).join("")}</div>
   ${warmHTML(day, "cool")}
   <div class="finish-bar"><button class="btn" id="finish">Terminar sesión</button></div>`;
 
@@ -844,6 +853,8 @@ function renderSession(){
     ta.addEventListener("blur", () => { if (!ta.value.trim()){ box.hidden = true; b.hidden = false; } });
   });
   const keepScroll = fn => { const y = window.scrollY; fn(); save(); renderSession(); window.scrollTo(0, y); };
+  app.querySelectorAll(".opt-b").forEach(b => b.onclick = () => keepScroll(() => {
+    const k = optKey(day, +b.dataset.ei); if (b.dataset.o === "b") log[k] = "b"; else delete log[k]; }));
   app.querySelectorAll(".add-aprox").forEach(b => b.onclick = () => keepScroll(() => {
     const kn = `${day.id}-${b.dataset.ei}-xn`; log[kn] = (+log[kn] || 0) + 1; }));
   app.querySelectorAll(".del-x").forEach(b => b.onclick = () => keepScroll(() => {
@@ -923,7 +934,7 @@ function setupBlock(day, ex, ei){
 }
 function setupCtx(w){
   const day = CLIENTS[code].days.find(d => d.id === w.dataset.d), ei = +w.dataset.e;
-  return { day, ei, ex: day.exercises[ei], k: setupKey(day, ei) };
+  return { day, ei, ex: exs(day)[ei], k: setupKey(day, ei) };
 }
 function setupOpen(w){
   const { day, ex, ei, k } = setupCtx(w), cur = mySetup[k] != null ? mySetup[k] : (ex.setup || "");
@@ -968,6 +979,7 @@ function exCard(day, ex, ei){
       <div><div class="ex-idx">${String(ei+1).padStart(2,"0")}</div><div class="ex-name">${esc(ex.name)}</div>${ex.meta ? `<div class="ex-meta">${esc(ex.meta)}</div>` : ""}${setupBlock(day, ex, ei)}</div>
       ${hasInfo(ex) ? `<button class="see" aria-expanded="false" aria-controls="cue-${day.id}-${ei}">Ver ejercicio</button>` : ""}
     </div>
+    ${ex.alt ? `<div class="opt" role="group" aria-label="Opción del ejercicio"><button class="opt-b" data-ei="${ei}" data-o="a" aria-pressed="${!ex.isB}">Opción A</button><button class="opt-b" data-ei="${ei}" data-o="b" aria-pressed="${!!ex.isB}">Opción B</button>${ex.isB ? "" : `<span>¿Ocupada o no la hay? Usa la B: ${esc(ex.alt.name)}</span>`}</div>` : ""}
     ${hasInfo(ex) ? `<div class="cues" id="cue-${day.id}-${ei}" hidden>
       ${mediaHTML(ex, `${day.id}-${ei}`)}
       ${ex.cues.map(c=>`<div>• ${esc(c)}</div>`).join("")}
@@ -1018,7 +1030,7 @@ function sidesHTML(day, ei, o, k, v){
       ${lastHTML(l, sd)}
       <button class="check" aria-label="Marcar serie como hecha" aria-pressed="${!!v.done}">✓</button>
     </div>`;
-  const limb = (day.exercises[ei] && day.exercises[ei].limb) || "Brazo", g = limb === "Pierna" ? "a" : "o";
+  const limb = (exs(day)[ei] && exs(day)[ei].limb) || "Brazo", g = limb === "Pierna" ? "a" : "o";
   return `<div class="sides" role="group" aria-label="${limb}">
       <button class="side" data-s="R" aria-pressed="${cur === "R"}">${limb} derech${g}<small>${mini(v.kg, v.reps)}</small></button>
       <button class="side" data-s="L" aria-pressed="${cur === "L"}">${limb} izquierd${g}<small>${mini(v.kgL, v.repsL)}</small></button>
@@ -1061,7 +1073,7 @@ function topHint(el, k, on){
   const old = el.querySelector(".pr-hint"); if (old) old.remove();
   if (!on) return;
   const day = CLIENTS[code].days[dayIdx];
-  day.exercises.some((ex,ei) => {
+  exs(day).some((ex,ei) => {
     const o = setsOf(day,ex,ei).find(x => x.k === k);
     if (!o) return false;
     const f = ["top","bo","bo2"].includes(o.s.type) && !o.extra ? setFeedback(day, ex, ei, o) : null;
@@ -1077,7 +1089,7 @@ function topHint(el, k, on){
 
 function daySets(){
   const day = CLIENTS[code].days[dayIdx], out = [];
-  day.exercises.forEach((ex,ei) => setsOf(day,ex,ei).forEach(o => out.push({ex, s:o.s, v: log[o.k] || {}})));
+  exs(day).forEach((ex,ei) => setsOf(day,ex,ei).forEach(o => out.push({ex, s:o.s, v: log[o.k] || {}})));
   return out;
 }
 function updateBar(){
@@ -1351,7 +1363,7 @@ function compareTop(K, R, k, r, tmin){
 }
 function progressFeedback(day){
   const out = [];
-  day.exercises.forEach((ex,ei) => { const r = topFeedback(day, ex, ei); if (r) out.push(r); });
+  exs(day).forEach((ex,ei) => { const r = topFeedback(day, ex, ei); if (r) out.push(r); });
   return out;
 }
 /* Top set de hoy vs. la última vez para un ejercicio (null si falta algún dato) */
@@ -1419,7 +1431,7 @@ function showSummary(){
   const date = new Date().toLocaleDateString("es-ES", {weekday:"long", day:"numeric", month:"long"});
   const cell = v => v === undefined || v === null || v === "" ? `<td class="miss">—</td>` : `<td>${esc(v)}</td>`;
   const FB = progressFeedback(day);
-  const tables = day.exercises.map((ex,ei) => `<section class="rp-ex"><div class="rp-ex-h"><span class="rp-n">${String(ei+1).padStart(2,"0")}</span><h3>${esc(ex.name)}</h3></div>${setupPdf(day, ex, ei)}<table><thead><tr><th>Serie</th><th class="r">Kg</th><th class="r">Reps</th><th class="r">RPE</th><th class="r">RIR obj.</th><th class="r">Lectura</th></tr></thead><tbody>${
+  const tables = exs(day).map((ex,ei) => `<section class="rp-ex"><div class="rp-ex-h"><span class="rp-n">${String(ei+1).padStart(2,"0")}</span><h3>${esc(ex.name)}</h3></div>${setupPdf(day, ex, ei)}<table><thead><tr><th>Serie</th><th class="r">Kg</th><th class="r">Reps</th><th class="r">RPE</th><th class="r">RIR obj.</th><th class="r">Lectura</th></tr></thead><tbody>${
     setsOf(day,ex,ei).map(o => { const s = o.s, v = log[o.k] || {}, tr = tRir(ex, s), rd = rpeRead(v.rpe, tr);
       const has = [v.kg, v.reps, v.kgL, v.repsL].some(hasVal) || v.rpe != null;
       const c = (x, r) => x === undefined || x === null || x === "" ? `<td class="miss r">—</td>` : `<td class="r">${esc(x)}</td>`;
@@ -1431,7 +1443,7 @@ function showSummary(){
   const progHTML = FB.length ? `<div class="rp-prog"><div class="rp-h">Progreso · top set vs. última vez</div>${FB.map(x => `<div class="rp-pr ${x.cls}"><span>${esc(x.name)}</span><em>${esc(x.badge)}</em></div>`).join("")}</div>` : "";
   const entryId = "s" + Date.now();
   const E = { id: entryId, ts: Date.now(), dayId: day.id, dayLabel: day.label, block: cl.block || undefined, fb: FB,
-    exercises: day.exercises.map((ex,ei) => ({ name: ex.name, note: noteOf(day, ei) || undefined, setupHTML: setupPdf(day, ex, ei) || undefined, sets: setsOf(day,ex,ei).map(o => {
+    exercises: exs(day).map((ex,ei) => ({ name: ex.name, note: noteOf(day, ei) || undefined, setupHTML: setupPdf(day, ex, ei) || undefined, sets: setsOf(day,ex,ei).map(o => {
       const s = o.s, v = log[o.k] || {};
       return { extra: o.extra || undefined, type: s.type, target: s.target || undefined, kg: v.kg ?? "", reps: v.reps ?? "", ...(ex.uni ? { kgL: v.kgL ?? "", repsL: v.repsL ?? "" } : {}), rpe: v.rpe ?? null, rir: v.rir ?? null, tRir: tRir(ex, s), done: !!v.done };
     })})), warm: !!log[day.id + "-warm"], cool: !!log[day.id + "-cool"]
@@ -1462,7 +1474,7 @@ function showSummary(){
     const L = [`CRISXLIFT · ${cl.name} (${code.slice(0,2)}-${code.slice(2)})`, `${day.label} · ${date}`];
     if (day.warm && day.warm.length) L.push(`Calentamiento y movilidad: ${log[day.id + "-warm"] ? "✓ hecho" : "no marcado"}`);
     if (day.cool && day.cool.length) L.push(`Cardio final: ${log[day.id + "-cool"] ? "✓ hecho" : "no marcado"}`);
-    day.exercises.forEach((ex,ei) => {
+    exs(day).forEach((ex,ei) => {
       L.push("", ex.name.toUpperCase());
       setsOf(day,ex,ei).forEach(o => {
         const st = o.s, v = log[o.k] || {}, tr = tRir(ex, st), rd = rpeRead(v.rpe, tr);
