@@ -385,6 +385,13 @@ button{cursor:pointer}
 .pr-hint{margin:8px 0 0;font-size:13px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){.pr-hint{animation:prIn .3s ease-out}@keyframes prIn{from{opacity:0;transform:translateY(-3px)}}}
 .s-share{width:100%;padding:12px;font-size:15px}
+.s-edit{width:100%;margin-top:8px;padding:11px;font-size:14px}
+.ed-ex{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+.ed-ex h4{margin:0 0 6px;font-family:var(--display);font-size:16px;font-weight:800;text-transform:uppercase}
+.ed-set{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.ed-row{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:end}
+.ed-side{font-size:13px;color:var(--muted);padding-bottom:12px}
+.ed-intro{font-size:14px;color:var(--muted);margin:0}
 .s-del{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .s-del-b{background:none;border:1px solid rgba(255,178,122,.4);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--warn)}
 .s-del-q{flex:1 1 100%;margin:0;font-size:13px;color:var(--fg)}
@@ -1332,6 +1339,7 @@ function renderHistory(){
       <div class="sess-body">${e.exercises.map(ex => `<div><h4>${esc(ex.name)}</h4><table><thead><tr><th>Serie</th><th>Kg</th><th>Reps</th><th>RPE</th><th>Obj.</th></tr></thead><tbody>${
         ex.sets.map(s => `<tr><td>${TYPE_LABEL[s.type]}</td>${s.kgL !== undefined ? cell(hasVal(s.kg) || hasVal(s.kgL) ? `D ${hasVal(s.kg) ? fmt(s.kg) : "—"} / I ${hasVal(s.kgL) ? fmt(s.kgL) : "—"}` : "") : cell(s.kg === "" ? "" : fmt(s.kg))}${s.kgL !== undefined ? cell(hasVal(s.reps) || hasVal(s.repsL) ? `${s.reps || "—"} / ${s.repsL || "—"}` : "") : cell(s.reps)}${cell(s.rpe)}${cell(s.tRir != null ? "RIR " + s.tRir : s.rir)}</tr>`).join("")}</tbody></table>${ex.note ? `<p class="h-note">📝 ${esc(ex.note)}</p>` : ""}</div>`).join("")}
         ${e.imported ? "" : `<button class="btn s-share" data-sid="${esc(String(e.id || e.ts))}">🖼️ Compartir imagen con Cris</button>`}
+        ${e.imported ? "" : `<button class="ghost s-edit" data-sid="${esc(String(e.id || e.ts))}">✏️ Corregir series (si te faltó apuntar algo)</button>`}
         ${e.imported ? "" : `<div class="s-del" data-sid="${esc(String(e.id || e.ts))}"><button class="s-del-b" data-del="ask">Borrar esta sesión</button></div>`}
       </div></details>`;
   }).join("") : `<div class="empty">Aún no has guardado ninguna sesión.</div>`;
@@ -1362,6 +1370,9 @@ function renderHistory(){
   app.querySelectorAll(".s-share").forEach(b => b.onclick = () => {
     const e = hist.find(x => String(x.id || x.ts) === b.dataset.sid); if (e) showSavedReport(e);
   });
+  app.querySelectorAll(".s-edit").forEach(b => b.onclick = () => {
+    const e = hist.find(x => String(x.id || x.ts) === b.dataset.sid); if (e) editSession(e);
+  });
   app.querySelectorAll(".s-del").forEach(box => box.addEventListener("click", ev => {
     const b = ev.target.closest("[data-del]"); if (!b) return;
     const a = b.dataset.del, sid = box.dataset.sid;
@@ -1375,6 +1386,55 @@ function renderHistory(){
     }
   }));
   const sel = app.querySelector('.pick[aria-pressed="true"]'); if (sel){ const pk = sel.parentElement; pk.scrollLeft = sel.offsetLeft - pk.clientWidth/2 + sel.offsetWidth/2; }
+}
+
+/* ---------- Corregir una sesión ya terminada (desde Historial) ----------
+   Si se olvidó de apuntar una serie o un lado, la completa aquí. Se actualiza la misma
+   sesión en la hoja de Cris y el informe corregido le vuelve a llegar solo. */
+function editSession(e){
+  if (document.querySelector(".edit-sess")) return;
+  const W = JSON.parse(JSON.stringify(e.exercises));
+  const inp = (ei, si, f, v, lab, dec) => `<label class="field"><span>${lab}</span><input data-ei="${ei}" data-si="${si}" data-f="${f}" inputmode="${dec ? "decimal" : "numeric"}" value="${esc(v ?? "")}" placeholder="—"></label>`;
+  const sh = document.createElement("div");
+  sh.className = "sheet edit-sess";
+  sh.innerHTML = `<div class="sheet-in" role="dialog" aria-label="Corregir series">
+    <h2>Corregir series</h2>
+    <p class="ed-intro">${esc(e.dayLabel)} · ${esc(dm(e.ts))}. Completa lo que te faltó apuntar y dale a guardar. El informe corregido le llega solo a Cris.</p>
+    ${W.map((ex, ei) => ex.check ? "" : `<div class="ed-ex"><h4>${esc(ex.name)}</h4>${ex.sets.map((s, si) => {
+      const uni = s.kgL !== undefined, rpe = s.type === "aprox" ? "" : inp(ei, si, "rpe", s.rpe, "RPE");
+      const rows = uni
+        ? `<div class="ed-row"><b class="ed-side">Der.</b>${inp(ei,si,"kg",s.kg,"Kg",1)}${inp(ei,si,"reps",s.reps,"Reps")}${rpe}</div>
+           <div class="ed-row"><b class="ed-side">Izq.</b>${inp(ei,si,"kgL",s.kgL,"Kg",1)}${inp(ei,si,"repsL",s.repsL,"Reps")}</div>`
+        : `<div class="ed-row"><span></span>${inp(ei,si,"kg",s.kg,"Kg",1)}${inp(ei,si,"reps",s.reps,"Reps")}${rpe}</div>`;
+      return `<div class="ed-set"><div><span class="rp-t ${s.type}">${s.type === "aprox" ? "Aprox." : TYPE_LABEL[s.type]}${s.extra ? " +" : ""}</span></div>${rows}</div>`;
+    }).join("")}</div>`).join("")}
+    <div class="share-row">
+      <button class="btn" id="ed-save">Guardar cambios</button>
+      <button class="ghost" id="ed-cancel">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(sh);
+  const close = () => sh.remove();
+  sh.querySelector("#ed-cancel").onclick = close;
+  sh.addEventListener("click", ev => { if (ev.target === sh) close(); });
+  sh.querySelector("#ed-save").onclick = () => {
+    sh.querySelectorAll("input[data-f]").forEach(i => {
+      const s = W[+i.dataset.ei].sets[+i.dataset.si], f = i.dataset.f, val = i.value.trim().replace(",", ".");
+      if (f === "rpe"){ const n = parseInt(val); s.rpe = n >= 1 && n <= 10 ? n : null; }
+      else s[f] = val;
+    });
+    W.forEach(ex => { if (!ex.check) ex.sets.forEach(s => { if ([s.kg, s.reps, s.kgL, s.repsL].some(hasVal)) s.done = true; }); });
+    close();
+    if (JSON.stringify(W) === JSON.stringify(e.exercises)){ toast("No había nada que cambiar"); return; }
+    e.exercises = W; e.edited = Date.now();
+    /* Se vuelve a subir a la hoja (misma fila) y el informe corregido se manda otra vez */
+    store.set(P + "-synced-" + code, (store.get(P + "-synced-" + code) || []).filter(id => id !== sid(e)));
+    store.set(sentKey(code), (store.get(sentKey(code)) || []).filter(id => id !== sid(e)));
+    saveHist();
+    const y = window.scrollY; renderHistory(); window.scrollTo(0, y);
+    toast("Series corregidas ✓");
+    showSavedReport(e);
+  };
 }
 
 /* ---------- Resumen ---------- */
@@ -1649,7 +1709,7 @@ function entryPaper(e){
         <div class="rp-logo">Crisx<span>lift</span><small>Informe de sesión</small></div>
         <div class="rp-who"><b>${esc(cl.name)}</b><span class="rq-day">${esc(e.dayLabel)}</span></div>
       </div>
-      <div class="rq-dates"><span class="rq-chip"><b>${isToday ? "Hoy" : "Entreno"} ${esc(dm(e.ts))}</b></span>${prevTxt}</div>
+      <div class="rq-dates"><span class="rq-chip"><b>${isToday ? "Hoy" : "Entreno"} ${esc(dm(e.ts))}</b></span>${prevTxt}${e.edited ? `<span class="rq-chip dim">✏️ Corregido después</span>` : ""}</div>
       <div class="rp-body">
         <div class="rq-congrats">¡CRISTIAN TE FELICITA POR HABER CUMPLIDO UN DÍA MÁS!</div>
         <div class="rq-stats">
@@ -1673,7 +1733,7 @@ function showSavedReport(e){
       <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
       <button class="btn" id="img" disabled>Preparando la imagen…</button>
       <button class="undo" id="imgalt" hidden>¿No te deja compartir? Ver imagen para guardarla</button>
-      <p class="note" id="share-note">Es el mismo informe de ese día.</p>
+      <p class="note" id="share-note">${e.edited ? "Informe corregido de ese día." : "Es el mismo informe de ese día."}</p>
       <button class="ghost" id="close">Listo</button>
     </div>
   </div>`;
@@ -1684,7 +1744,7 @@ function showSavedReport(e){
   const note = sh.querySelector("#share-note"), imgBtn = sh.querySelector("#img");
   const slug = t => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const d0 = new Date(e.ts), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
-  const base = `Crisxlift_${slug(cl.name)}_${slug(String(e.dayLabel).split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}`;
+  const base = `Crisxlift_${slug(cl.name)}_${slug(String(e.dayLabel).split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}` + (e.edited ? `_corregido-${new Date(e.edited).getHours()}h${String(new Date(e.edited).getMinutes()).padStart(2,"0")}` : "");
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
