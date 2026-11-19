@@ -570,7 +570,8 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 /* ---------- Informe a la carpeta de Drive de Cristian (sin compartir nada a mano) ----------
    Al terminar, la imagen del informe se sube sola. Si no hay internet en el gimnasio,
    se guarda en el móvil y se manda sola en cuanto vuelva la conexión. */
-const sentKey = c => P + "-photosent-" + c;
+/* "photosent2": antes dos sesiones del mismo día se llamaban igual y la segunda no llegaba a Drive */
+const sentKey = c => P + "-photosent2-" + c;
 const photoSent = e => code && (store.get(sentKey(code)) || []).includes(sid(e));
 function markPhotoSent(c, id){ const s = store.get(sentKey(c)) || []; if (!s.includes(id)){ s.push(id); store.set(sentKey(c), s.slice(-200)); } }
 function reportJpeg(canvas){
@@ -1491,8 +1492,8 @@ function showSummary(){
   /* Imagen y PDF: se preparan al abrir el resumen, así compartir es instantáneo al tocar */
   const imgBtn = sh.querySelector("#img");
   const slug = t => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const d0 = new Date(), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
-  const base = `Crisxlift_${slug(cl.name)}_${slug(day.label.split("·")[0])}_${ds}`;
+  const d0 = new Date(E.ts), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
+  const base = `Crisxlift_${slug(cl.name)}_${slug(day.label.split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}`;
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
@@ -1634,7 +1635,7 @@ function showSavedReport(e){
   const note = sh.querySelector("#share-note"), imgBtn = sh.querySelector("#img");
   const slug = t => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const d0 = new Date(e.ts), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
-  const base = `Crisxlift_${slug(cl.name)}_${slug(String(e.dayLabel).split("·")[0])}_${ds}`;
+  const base = `Crisxlift_${slug(cl.name)}_${slug(String(e.dayLabel).split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}`;
   let rep = null;
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
