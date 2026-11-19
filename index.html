@@ -441,6 +441,29 @@ button{cursor:pointer}
 .rq-head h3,.rq-res,.rq-last,.rq-last b,.rq-rpe,.rq-rpe b,.rq-obj,.rq-type small,.rq .rp-note{color:#000}
 .rq-obj b{color:#000}
 .rq-row.skip .rq-res{color:#9a9a9a}
+/* ---------- Pulido visual (nov 2026): menos ruido, más sensación de logro ---------- */
+::selection{background:rgba(255,138,61,.35);color:var(--fg)}
+input,textarea{caret-color:var(--accent)}
+/* Botones secundarios (+ setup, + aproximación, nota): fondo suave en vez de línea discontinua */
+.setup-add,.add-aprox,.note-b{border:1px solid transparent;background:rgba(214,222,255,.06);color:#b9c0e0;display:inline-flex;align-items:center;gap:6px}
+.setup-add:active,.add-aprox:active,.note-b:active{background:rgba(214,222,255,.12)}
+.note-b svg{width:14px;height:14px;flex:0 0 auto}
+.last{border:1px solid transparent;background:rgba(14,19,48,.75)}
+.warm,.day-memo{border-style:solid}
+/* Mensaje de ánimo: caja entera tintada */
+.vibe{border:1px solid rgba(255,138,61,.24);background:rgba(255,138,61,.08)}
+/* Tarjetas con un poco de profundidad */
+.ex,.next,.card{box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 24px -14px rgba(0,0,0,.6)}
+.progress{height:6px}
+/* Serie hecha: se nota de un vistazo */
+.set{transition:background .25s ease-out}
+.set.done{background:rgba(83,211,166,.10);margin-inline:-16px;padding:12px 16px;border-top-color:rgba(83,211,166,.18)}
+.set.done .check{animation:pop .35s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes pop{0%{transform:scale(.8)}100%{transform:none}}
+/* Ejercicio completo: borde verde y "Hecho" junto al número */
+.ex:has(.set.done):not(:has(.set:not(.done))){box-shadow:inset 0 0 0 1.5px rgba(83,211,166,.45),0 10px 24px -14px rgba(0,0,0,.6)}
+.ex:has(.set.done):not(:has(.set:not(.done))) .ex-idx::after{content:" · Hecho";color:var(--ok);letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){.set.done .check{animation:none}}
 </style>
 
 </head>
@@ -996,7 +1019,7 @@ const noteOf = (day, ei) => { const n = log[noteKey(day, ei)]; return typeof n =
 function noteHTML(day, ei){
   const v = log[noteKey(day, ei)] || "", id = `note-${day.id}-${ei}`;
   return `<div class="ex-note" data-ei="${ei}">
-    <button class="note-b"${v ? " hidden" : ""} aria-controls="${id}">📝 Añadir nota</button>
+    <button class="note-b"${v ? " hidden" : ""} aria-controls="${id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Añadir nota</button>
     <div${v ? "" : " hidden"}><label for="${id}">Nota para Cris</label>
     <textarea id="${id}" maxlength="400" placeholder="Ej: me molestó un poco el hombro, la máquina estaba ocupada…">${esc(v)}</textarea></div>
   </div>`;
