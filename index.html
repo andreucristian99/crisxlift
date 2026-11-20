@@ -565,10 +565,16 @@ async function fetchClient(c, withBackup){
 async function refreshClient(c){
   try {
     const before = JSON.stringify(CLIENTS[c] || null);
-    const r = await api({ action: "login", code: c });
+    /* También trae la copia de la hoja: si el móvil perdió entrenos (otra ventana, Safari vs. app instalada,
+       iPhone que borró datos…), los recupera solos al abrir */
+    const r = await api({ action: "login", code: c, withBackup: true });
     if (!r || !r.ok || !r.client) return;
-    if (JSON.stringify(r.client) === before) return;
-    store.set(P + "-client-" + c, r.client);
+    const n0 = (store.get(P + "-hist-" + c) || []).length;
+    mergeBackup(c, r.backup);
+    const gotBack = (store.get(P + "-hist-" + c) || []).length > n0;
+    const changed = JSON.stringify(r.client) !== before;
+    if (!changed && !gotBack) return;
+    if (changed) store.set(P + "-client-" + c, r.client);
     if (code === c && view !== "train"){ CLIENTS[c] = r.client; login(c); }
   } catch(e){}
 }
