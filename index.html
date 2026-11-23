@@ -302,6 +302,20 @@ button{cursor:pointer}
 .send-st{margin:0;padding:12px 14px;border-radius:12px;background:#f1efe9;font-weight:700;font-size:15px;text-align:center}
 .send-st.ok{background:#e4f3e8;color:#1d6a35}
 .send-st.wait{background:#fff3e2;color:#8a5200}
+/* Informes por mail (opcional, el cliente lo pone una sola vez) */
+.mail-row{display:flex;flex-direction:column;gap:6px}
+.mail-b{appearance:none;border:1px dashed #c9c3b5;background:#fff;border-radius:12px;padding:11px 12px;font:600 14px/1.3 var(--body);color:#1a2247;cursor:pointer;text-align:center}
+.mail-b u{color:#d96a1c;text-underline-offset:2px}
+.mail-st{margin:0;padding:10px 12px;border-radius:12px;background:#eef1fb;color:#1a2247;font-size:13.5px;text-align:center;line-height:1.35;overflow-wrap:anywhere}
+.mail-acts{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.mail-l{background:none;border:0;padding:4px;font-size:12.5px;color:#55607a;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.mail-f{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#fff;border:1px solid #e3dfd5}
+.mail-f label{font-weight:700;font-size:14px;color:#1a2247}
+.mail-f input{font:500 16px var(--body);padding:11px 12px;border-radius:10px;border:1px solid #cfc9bb;background:#fbfaf7;color:#1a2247}
+.mail-f .btn{padding:10px 18px}
+.mail-err{margin:0;font-size:12.5px;color:#b4381c}
+.mail-pp{margin:0;font-size:11.5px;color:#7a7f8c;text-align:center}
+.mail-row > .mail-acts .mail-l{color:#d5dbef}
 /* Grabarse (como los colores del Excel): verde = grabar top set · naranja = grabar top set y back-off */
 .ex.rec-top{box-shadow:inset 5px 0 0 #3ddc84}
 .ex.rec-topbo{box-shadow:inset 5px 0 0 var(--accent)}
@@ -552,11 +566,13 @@ function mergeBackup(c, b){
   const k = b.keys || {};
   if (k.crea) store.set(P + "-crea-" + c, Object.assign({}, k.crea, store.get(P + "-crea-" + c) || {}));
   if (k.setup) store.set(P + "-setup-" + c, Object.assign({}, k.setup, store.get(P + "-setup-" + c) || {}));
+  if (typeof k.mail === "string" && store.get(P + "-mail-" + c) == null) store.set(P + "-mail-" + c, k.mail);
 }
 /* Pide la rutina a la hoja. true = existe, false = ese código no existe; lanza error si no hay conexión */
 async function fetchClient(c, withBackup){
   const r = await api({ action: "login", code: c, withBackup: !!withBackup });
   if (!r || !r.ok){ if (r && r.error === "no-existe") return false; throw new Error("api"); }
+  store.set(P + "-mailon", !!r.mailOn);
   cacheClient(c, r.client);
   if (withBackup) mergeBackup(c, r.backup);
   return true;
@@ -569,6 +585,7 @@ async function refreshClient(c){
        iPhone que borró datos…), los recupera solos al abrir */
     const r = await api({ action: "login", code: c, withBackup: true });
     if (!r || !r.ok || !r.client) return;
+    store.set(P + "-mailon", !!r.mailOn);
     const n0 = (store.get(P + "-hist-" + c) || []).length;
     mergeBackup(c, r.backup);
     const gotBack = (store.get(P + "-hist-" + c) || []).length > n0;
@@ -591,7 +608,7 @@ async function syncNow(){
   if (!pend.length && !deleted.length && !dirty) return;
   syncing = true;
   try {
-    const keys = dirty ? { crea: store.get(P + "-crea-" + c) || {}, setup: store.get(P + "-setup-" + c) || {} } : {};
+    const keys = dirty ? { crea: store.get(P + "-crea-" + c) || {}, setup: store.get(P + "-setup-" + c) || {}, ...(store.get(P + "-mail-" + c) != null ? { mail: store.get(P + "-mail-" + c) } : {}) } : {};
     const r = await api({ action: "save", code: c, sessions: pend, deleted, keys });
     if (r && r.ok){
       const s2 = new Set(store.get(P + "-synced-" + c) || []); pend.forEach(e => s2.add(sid(e)));
@@ -617,6 +634,13 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
    Al terminar, la imagen del informe se sube sola. Si no hay internet en el gimnasio,
    se guarda en el móvil y se manda sola en cuanto vuelva la conexión. */
 /* "photosent2": antes dos sesiones del mismo día se llamaban igual y la segunda no llegaba a Drive */
+/* Mail del cliente para recibir sus informes: opcional, lo pone una sola vez (se guarda en el móvil y en la hoja).
+   Solo se muestra si la hoja ya sabe mandar mails (mailOn llega al entrar) */
+const mailKey = c => P + "-mail-" + c;
+const getMail = () => code ? (store.get(mailKey(code)) || "") : "";
+const okMail = m => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
+function setMail(m){ store.set(mailKey(code), m || ""); markKeys(); }
+const mailOn = () => !!store.get(P + "-mailon");
 const sentKey = c => P + "-photosent2-" + c;
 const photoSent = e => code && (store.get(sentKey(code)) || []).includes(sid(e));
 function markPhotoSent(c, id){ const s = store.get(sentKey(c)) || []; if (!s.includes(id)){ s.push(id); store.set(sentKey(c), s.slice(-200)); } }
@@ -629,12 +653,12 @@ function reportJpeg(canvas){
   return cv.toDataURL("image/jpeg", 0.85).split(",")[1];
 }
 async function postPhoto(it){
-  try { const r = await api({ action: "photo", code: it.code, id: it.id, name: it.name, data: it.data }); return !!(r && r.ok); }
+  try { const r = await api({ action: "photo", code: it.code, id: it.id, name: it.name, data: it.data, mail: it.mail || undefined }); return !!(r && r.ok); }
   catch(e){ return false; }
 }
 /* true = le llegó a Cristian; false = queda en cola y se manda sola más tarde */
 async function sendReport(e, canvas, base){
-  const it = { code, id: sid(e), name: base + ".jpg", data: reportJpeg(canvas) };
+  const it = { code, id: sid(e), name: base + ".jpg", data: reportJpeg(canvas), mail: (mailOn() && getMail()) || undefined };
   if (await postPhoto(it)){ markPhotoSent(it.code, it.id); return true; }
   const q = (store.get(P + "-photoq") || []).filter(x => x.id !== it.id); q.push(it);
   while (q.length > 4) q.shift();
@@ -1555,6 +1579,78 @@ function confirmFinish(left){
   setTimeout(() => { end.disabled = false; }, 600);
   end.onclick = () => { close(); showSummary(); };
 }
+/* Bloque del mail: pedirlo (una sola vez), cambiarlo, quitarlo o enviarse este informe */
+function mailRow(sh, e, getRep, base, auto){
+  const box = sh.querySelector("#mail-row"); if (!box) return;
+  if (!mailOn()){ box.hidden = true; return; }
+  const sendNow = () => {
+    const r = getRep(), m = getMail(); if (!r || !m) return Promise.resolve(false);
+    return api({ action: "mail", code, id: sid(e), name: base + ".jpg", data: reportJpeg(r.canvas), mail: m })
+      .then(x => !!(x && x.ok)).catch(() => false);
+  };
+  const paint = msg => {
+    const m = getMail();
+    if (!m){
+      box.innerHTML = `<button class="mail-b" id="mail-ask">📩 ¿Quieres recibir tus informes por mail? <u>Toca aquí</u></button>`;
+      box.querySelector("#mail-ask").onclick = form; return;
+    }
+    box.innerHTML = `<p class="mail-st">${msg || (auto ? `📩 También te llega a tu mail: <b>${esc(m)}</b>` : `📩 Tus informes te llegan a <b>${esc(m)}</b>`)}</p>
+      <div class="mail-acts">${auto ? "" : `<button class="mail-l" id="mail-send">Enviarme este informe al mail</button>`}<button class="mail-l" id="mail-chg">Cambiar mail</button></div>`;
+    box.querySelector("#mail-chg").onclick = form;
+    const sb = box.querySelector("#mail-send");
+    if (sb) sb.onclick = async () => {
+      if (!getRep()){ toast("Espera un segundo, se está preparando la imagen"); return; }
+      sb.disabled = true; sb.textContent = "Enviando…";
+      const ok = await sendNow();
+      paint(ok ? `✓ Enviado a <b>${esc(m)}</b>. Mira tu bandeja (o spam la primera vez).` : "No se pudo enviar ahora. Prueba otra vez en un rato.");
+    };
+  };
+  const form = () => {
+    const m0 = getMail();
+    box.innerHTML = `<div class="mail-f">
+      <label for="mail-in">Tu mail (solo lo pones una vez)</label>
+      <input id="mail-in" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="tu@mail.com" value="${esc(m0)}">
+      <p class="mail-err" id="mail-err" hidden>Revisa el mail, parece que falta algo.</p>
+      <div class="mail-acts"><button class="btn" id="mail-ok">Guardar</button>${m0 ? `<button class="mail-l" id="mail-del">Quitar mail</button>` : ""}<button class="mail-l" id="mail-no">Ahora no</button></div>
+      <p class="mail-pp">Solo se usa para mandarte tus informes. Puedes cambiarlo o quitarlo cuando quieras.</p></div>`;
+    const inp = box.querySelector("#mail-in"); inp.focus();
+    box.querySelector("#mail-no").onclick = () => paint();
+    const del = box.querySelector("#mail-del");
+    if (del) del.onclick = () => { setMail(""); paint(); toast("Listo, ya no te llegan por mail"); };
+    box.querySelector("#mail-ok").onclick = async () => {
+      const v = inp.value.trim().toLowerCase();
+      if (!okMail(v)){ box.querySelector("#mail-err").hidden = false; return; }
+      setMail(v);
+      paint(`⏳ Guardando y enviándote este informe a <b>${esc(v)}</b>…`);
+      const ok = await sendNow();
+      paint(ok ? `✓ Listo: desde ahora tus informes te llegan a <b>${esc(v)}</b>. Este ya te lo mandé (mira spam la primera vez).`
+               : `✓ Guardado: tus próximos informes te llegan a <b>${esc(v)}</b>.`);
+    };
+  };
+  paint();
+}
+/* Guardar la imagen: en iPhone sale el menú con «Guardar imagen»; en Android y ordenador se descarga directa */
+function wireSave(sh, getRep, base, note){
+  const saveBtn = sh.querySelector("#save-img");
+  saveBtn.onclick = async () => {
+    const rep = getRep(); if (!rep) return;
+    const f = new File([rep.blob], base + ".jpg", { type: "image/jpeg" });
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+      if (navigator.canShare && navigator.share && navigator.canShare({ files: [f] })){
+        try { await navigator.share({ files: [f] }); note.textContent = "Si elegiste «Guardar imagen», ya la tienes en tus Fotos ✓"; return; }
+        catch(err){ if (err && err.name === "AbortError") return; }
+      }
+      showReportImage(rep.blob); return;
+    }
+    try {
+      const url = URL.createObjectURL(f), a = document.createElement("a");
+      a.href = url; a.download = f.name; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+      note.textContent = "Imagen guardada ✓ La tienes en Descargas (o en tu galería).";
+    } catch(err){ showReportImage(rep.blob); }
+  };
+  return saveBtn;
+}
 function showSummary(){
   const cl = CLIENTS[code], day = cl.days[dayIdx];
   const all = daySets(), done = all.filter(x => x.v.done);
@@ -1594,7 +1690,9 @@ function showSummary(){
     ${entryPaper(E)}
     <div class="share-row">
       <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
-      <button class="btn" id="img" disabled>Preparando la imagen…</button>
+      <div class="mail-row" id="mail-row"></div>
+      <button class="btn" id="save-img" disabled>Preparando la imagen…</button>
+      <button class="ghost" id="img" disabled>Preparando la imagen…</button>
       <button class="undo" id="imgalt" hidden>¿No te deja compartir? Ver imagen para guardarla</button>
       <p class="note" id="share-note">Ya está guardada en tu historial ✓ El informe le llega solo a Cris; compartirlo es opcional.</p>
       <button class="ghost" id="close">Listo</button>
@@ -1643,14 +1741,17 @@ function showSummary(){
   const d0 = new Date(E.ts), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
   const base = `Crisxlift_${slug(cl.name)}_${slug(day.label.split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}`;
   let rep = null;
+  mailRow(sh, E, () => rep, base, true);
+  const saveBtn = wireSave(sh, () => rep, base, note);
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    saveBtn.disabled = false; saveBtn.textContent = "📥 Guardar imagen en mi móvil";
     sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, E, rep, base, "Cris");
   }).catch(() => {
     const st = sh.querySelector("#send-st"); st.className = "send-st ok";
     st.textContent = "Tranqui: tus series ya quedaron guardadas y Cris las ve igual en su hoja 💪";
-    imgBtn.hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
+    imgBtn.hidden = true; saveBtn.hidden = true; sh.querySelector("#mail-row").hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
   });
   imgBtn.onclick = async () => {
     if (!rep) return;
@@ -1770,7 +1871,9 @@ function showSavedReport(e){
     ${entryPaper(e)}
     <div class="share-row">
       <p class="send-st" id="send-st">Preparando el informe para Cris…</p>
-      <button class="btn" id="img" disabled>Preparando la imagen…</button>
+      <div class="mail-row" id="mail-row"></div>
+      <button class="btn" id="save-img" disabled>Preparando la imagen…</button>
+      <button class="ghost" id="img" disabled>Preparando la imagen…</button>
       <button class="undo" id="imgalt" hidden>¿No te deja compartir? Ver imagen para guardarla</button>
       <p class="note" id="share-note">${e.edited ? "Informe corregido de ese día." : "Es el mismo informe de ese día."}</p>
       <button class="ghost" id="close">Listo</button>
@@ -1785,14 +1888,17 @@ function showSavedReport(e){
   const d0 = new Date(e.ts), ds = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,"0")}-${String(d0.getDate()).padStart(2,"0")}`;
   const base = `Crisxlift_${slug(cl.name)}_${slug(String(e.dayLabel).split("·")[0])}_${ds}_${String(d0.getHours()).padStart(2,"0")}h${String(d0.getMinutes()).padStart(2,"0")}` + (e.edited ? `_corregido-${new Date(e.edited).getHours()}h${String(new Date(e.edited).getMinutes()).padStart(2,"0")}` : "");
   let rep = null;
+  mailRow(sh, e, () => rep, base, false);
+  const saveBtn = wireSave(sh, () => rep, base, note);
   reportRender(sh.querySelector(".paper")).then(r => {
     rep = r; imgBtn.disabled = false; imgBtn.textContent = "🖼️ Compartir imagen con Cris";
+    saveBtn.disabled = false; saveBtn.textContent = "📥 Guardar imagen en mi móvil";
     sh.querySelector("#imgalt").onclick = () => showReportImage(rep.blob);
     autoSend(sh, e, rep, base, "Cris");
   }).catch(() => {
     const st = sh.querySelector("#send-st"); st.className = "send-st ok";
     st.textContent = "Tranqui: tus series ya quedaron guardadas y Cris las ve igual en su hoja 💪";
-    imgBtn.hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
+    imgBtn.hidden = true; saveBtn.hidden = true; sh.querySelector("#mail-row").hidden = true; note.textContent = "Esta vez no se pudo crear la imagen del informe. No tienes que hacer nada más.";
   });
   imgBtn.onclick = async () => {
     if (!rep) return;
