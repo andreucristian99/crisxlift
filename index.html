@@ -847,14 +847,16 @@ function setsOf(day, ex, ei){
 }
 /* Opción A / B por ejercicio (por si la máquina está ocupada o no existe): "alt" en la rutina */
 const optKey = (day, ei) => `${day.id}-${ei}-opt`;
-const exAt = (day, ex, ei) => ex && ex.alt && log[optKey(day, ei)] === "b" ? Object.assign({}, ex, ex.alt, { isB: true }) : ex;
+/* Opción B (alt) y opción C (alt2): mismo patrón de movimiento si la A está ocupada */
+const exAt = (day, ex, ei) => { const o = ex && log[optKey(day, ei)];
+  return o === "c" && ex.alt2 ? Object.assign({}, ex, ex.alt2, { isC: true }) : o === "b" && ex.alt ? Object.assign({}, ex, ex.alt, { isB: true }) : ex; };
 const exs = day => day.exercises.map((ex, ei) => exAt(day, ex, ei));
 /* "Última vez": misma serie (mismo tipo y mismo orden) del último entreno de ese día */
 function lastFor(dayId, ei, type, ord){
   const cd = CLIENTS[code].days.find(d => d.id === dayId), base = cd && cd.exercises[ei], nm = base && exAt(cd, base, ei).name;
   for (let i = hist.length - 1; i >= 0; i--){
     const e = hist[i]; if (e.dayId !== dayId) continue;
-    if (base && base.alt && e.exercises[ei] && e.exercises[ei].name !== nm) continue;
+    if (base && (base.alt || base.alt2) && e.exercises[ei] && e.exercises[ei].name !== nm) continue;
     const s = e.exercises[ei] && e.exercises[ei].sets.filter(x => x.type === type)[ord];
     const ro = repsOnly(e.exercises[ei]);
     if (s && s.done && (((s.kg !== "" || ro) && s.reps !== "") || (hasVal(s.kgL) && hasVal(s.repsL)))) return { ts: e.ts, kg: s.kg, reps: s.reps, kgL: s.kgL, repsL: s.repsL, rir: s.rir, rpe: s.rpe };
@@ -921,7 +923,7 @@ function renderSession(){
   });
   const keepScroll = fn => { const y = window.scrollY; fn(); save(); renderSession(); window.scrollTo(0, y); };
   app.querySelectorAll(".opt-b").forEach(b => b.onclick = () => keepScroll(() => {
-    const k = optKey(day, +b.dataset.ei); if (b.dataset.o === "b") log[k] = "b"; else delete log[k]; }));
+    const k = optKey(day, +b.dataset.ei); if (b.dataset.o === "b" || b.dataset.o === "c") log[k] = b.dataset.o; else delete log[k]; }));
   app.querySelectorAll(".add-aprox").forEach(b => b.onclick = () => keepScroll(() => {
     const kn = `${day.id}-${b.dataset.ei}-xn`; log[kn] = (+log[kn] || 0) + 1; }));
   app.querySelectorAll(".del-x").forEach(b => b.onclick = () => keepScroll(() => {
@@ -987,7 +989,8 @@ function loadShort(panel){
 function unloadShort(panel){ panel.querySelectorAll(".short.on").forEach(el => { el.classList.remove("on"); el.innerHTML = ""; }); }
 
 /* ---------- Setup editable por el cliente ---------- */
-function setupKey(day, ei){ return `${day.id}-${ei}`; }
+/* La opción C guarda su propio setup (es otra máquina); A y B siguen como siempre */
+function setupKey(day, ei){ const ex = day.exercises[ei]; return `${day.id}-${ei}` + (ex && ex.alt2 && log[optKey(day, ei)] === "c" ? "c" : ""); }
 function setupInner(day, ex, ei){
   const k = setupKey(day, ei), mine = mySetup[k], shown = mine != null ? mine : ex.setup;
   if (!shown) return `<button class="setup-add" data-act="edit">+ Añadir setup</button>`;
@@ -1050,7 +1053,7 @@ function exCard(day, ex, ei){
       <div><div class="ex-idx">${String(ei+1).padStart(2,"0")}</div><div class="ex-name">${esc(ex.name)}</div>${recChip(ex)}${ex.meta ? `<div class="ex-meta">${esc(ex.meta)}</div>` : ""}${setupBlock(day, ex, ei)}</div>
       ${hasInfo(ex) ? `<button class="see" aria-expanded="false" aria-controls="cue-${day.id}-${ei}">Ver ejercicio</button>` : ""}
     </div>
-    ${ex.alt ? `<div class="opt" role="group" aria-label="Opción del ejercicio"><button class="opt-b" data-ei="${ei}" data-o="a" aria-pressed="${!ex.isB}">Opción A</button><button class="opt-b" data-ei="${ei}" data-o="b" aria-pressed="${!!ex.isB}">Opción B</button>${ex.isB ? "" : `<span>¿Ocupada o no la hay? Usa la B: ${esc(ex.alt.name)}</span>`}</div>` : ""}
+    ${ex.alt ? `<div class="opt" role="group" aria-label="Opción del ejercicio"><button class="opt-b" data-ei="${ei}" data-o="a" aria-pressed="${!ex.isB && !ex.isC}">Opción A</button><button class="opt-b" data-ei="${ei}" data-o="b" aria-pressed="${!!ex.isB}">Opción B</button>${ex.alt2 ? `<button class="opt-b" data-ei="${ei}" data-o="c" aria-pressed="${!!ex.isC}">Opción C</button>` : ""}${ex.isB || ex.isC ? "" : `<span>¿Ocupada o no la hay? Usa la B: ${esc(ex.alt.name)}${ex.alt2 ? ` o la C: ${esc(ex.alt2.name)}` : ""}</span>`}</div>` : ""}
     ${hasInfo(ex) ? `<div class="cues" id="cue-${day.id}-${ei}" hidden>
       ${mediaHTML(ex, `${day.id}-${ei}`)}
       ${ex.cues.map(c=>`<div>• ${esc(c)}</div>`).join("")}
@@ -1770,10 +1773,10 @@ const agoTxt = n => n === 0 ? "hoy" : n === 1 ? "ayer" : `hace ${n} días`;
 /* Definición pautada del ejercicio (para sacar el objetivo de reps en sesiones antiguas) */
 function rpDef(e, ei, ex){
   const day = CLIENTS[code].days.find(d => d.id === e.dayId); if (!day) return null;
-  const is = d => d && (d.name === ex.name || (d.alt && d.alt.name === ex.name));
+  const is = d => d && (d.name === ex.name || (d.alt && d.alt.name === ex.name) || (d.alt2 && d.alt2.name === ex.name));
   const d = is(day.exercises[ei]) ? day.exercises[ei] : day.exercises.find(is);
   if (!d) return null;
-  return d.alt && d.name !== ex.name ? d.alt : d;
+  return d.name === ex.name ? d : d.alt && d.alt.name === ex.name ? d.alt : d.alt2;
 }
 const rpTarget = (v, def) => v.target || (def && (def.sets.find(s => s.type === v.type) || {}).target) || "";
 /* Última vez que hizo ESTE ejercicio (en cualquier día de la rutina), antes de esta sesión */
