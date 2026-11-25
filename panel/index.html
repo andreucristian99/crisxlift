@@ -186,6 +186,7 @@ const dShort = ts => new Date(ts).toLocaleDateString("es-ES", { weekday: "short"
 const hhmm = ts => new Date(ts).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 
 let key = store.get("cp-key"), appId = store.get("cp-app") || "CristianEntrenador";
+let cq = "";
 let data = null, filter = "all", sel = null, ctab = "ses", openEx = null, loading = false;
 
 async function api(body){
@@ -282,9 +283,10 @@ function render(){
       ${chip("r", "r", n.r, "7+ días sin entrenar")}
       ${chip("n", "n", n.n, "sin empezar")}
     </div>
+    <input id="buscar" class="inp" type="search" placeholder="🔍 Buscar cliente…" autocomplete="off" value="${esc(cq)}" style="margin-bottom:8px">
     <button class="ghost" id="nuevo" style="margin-bottom:6px">＋ Nuevo cliente en ${esc(APPS.find(a => a.id === appId).label)}</button>
     <div class="blk">${filter === "all" ? "Todos los clientes" : `Filtrando · <button class="back" id="all" style="padding:0;font-size:12px;letter-spacing:0;text-transform:none;text-decoration:underline">ver todos</button>`}</div>
-    <div class="cl">${list.map(r => `<button class="ci" data-c="${esc(r.code)}">
+    <div class="cl">${list.map(r => `<button class="ci" data-c="${esc(r.code)}" data-q="${esc(norm(r.name + " " + r.code))}">
       <span class="dot ${r.st}"></span>
       <span><span class="ci-n">${esc(r.name)}</span><br><span class="ci-m">${r.last ? `${esc(r.last.dayLabel || "")} · ${agoTxt(r.since)}` : "Aún no ha registrado ningún entreno"}</span></span>
       <span class="ci-r"><span class="wkb" aria-label="${r.wk} de ${r.days} esta semana">${Array.from({ length: Math.max(r.days, r.wk) }, (_, i) => `<i class="${i < r.wk ? "on" : ""}"></i>`).join("")}</span><small>${r.wk}/${r.days} semana</small></span>
@@ -293,6 +295,16 @@ function render(){
   app.querySelectorAll(".sum button").forEach(b => b.onclick = () => { filter = filter === b.dataset.f ? "all" : b.dataset.f; render(); });
   const all = document.getElementById("all"); if (all) all.onclick = () => { filter = "all"; render(); };
   document.getElementById("nuevo").onclick = () => newClientForm();
+  /* Buscar cliente: filtra la lista mientras escribes (por nombre o código) */
+  const bus = document.getElementById("buscar");
+  const filtra = () => {
+    cq = bus.value; const t = norm(cq.trim()); let vis = 0;
+    app.querySelectorAll(".ci").forEach(b => { const ok = !t || b.dataset.q.includes(t); b.hidden = !ok; if (ok) vis++; });
+    let e = document.getElementById("sinres");
+    if (!vis && t){ if (!e){ e = document.createElement("div"); e.id = "sinres"; e.className = "empty"; app.querySelector(".cl").appendChild(e); } e.textContent = "Ningún cliente con ese nombre"; }
+    else if (e) e.remove();
+  };
+  bus.oninput = filtra; if (cq) filtra();
   app.querySelectorAll(".ci").forEach(b => b.onclick = () => { sel = b.dataset.c; ctab = "ses"; openEx = null; render(); window.scrollTo(0,0); });
 }
 function wireTop(){
