@@ -249,6 +249,11 @@ button{cursor:pointer}
 .next ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .next li{display:flex;justify-content:space-between;gap:10px}
 .vibe{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.4;border-left:3px solid var(--accent)}
+/* Entreno a medias: aviso al volver a abrir la app */
+.resume{background:var(--surface);border:2px solid var(--accent);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.resume h3{margin:0;font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;line-height:1.1}
+.resume p{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}
+.resume p b{color:inherit}
 .alt{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .alt-b{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--fg)}
 .nolock{font-size:12px;color:var(--muted);text-align:center;margin:0 8px}
@@ -773,7 +778,41 @@ function login(c){
   render();
 }
 function logout(){ store.del("cx-code"); code = null; renderLogin(); }
-function save(){ store.set("cx-log-" + code, log); }
+function save(){ store.set("cx-log-" + code, log); store.set("cx-logts-" + code, Date.now()); }
+/* Entreno a medias: un día con series marcadas o con kilos/reps apuntados que todavía no se terminó */
+function pendingDay(){
+  const cl = CLIENTS[code]; let best = null;
+  cl.days.forEach((day, i) => {
+    let total = 0, done = 0, any = false;
+    exs(day).forEach((ex, ei) => setsOf(day, ex, ei).forEach(o => {
+      const v = log[o.k] || {}; total++;
+      if (v.done) done++;
+      if (v.done || [v.kg, v.reps, v.kgL, v.repsL].some(x => x != null && String(x).trim() !== "")) any = true;
+    }));
+    if (any && (!best || done > best.done)) best = { i, day, done, total };
+  });
+  return best;
+}
+function clearDay(day){ Object.keys(log).filter(k => k.startsWith(day.id + "-")).forEach(k => delete log[k]); save(); }
+function confirmRestart(p){
+  if (document.querySelector(".confirm-end")) return;
+  const c = document.createElement("div");
+  c.className = "sheet confirm-end";
+  c.innerHTML = `<div class="sheet-in" role="dialog" aria-label="Empezar de cero">
+    <h2>¿Empezar de cero?</h2>
+    <p class="note" style="font-size:15px">Se borra lo que llevabas apuntado de <b>${esc(p.day.label)}</b> (${p.done} de ${p.total} series). No se puede recuperar.</p>
+    <div class="share-row">
+      <button class="btn" id="rs-keep">No, mejor lo continúo</button>
+      <button class="ghost" id="rs-del">Sí, empezar de cero</button>
+    </div>
+  </div>`;
+  document.body.appendChild(c);
+  const close = () => c.remove();
+  c.addEventListener("click", ev => { if (ev.target === c) close(); });
+  c.querySelector("#rs-keep").onclick = () => { close(); dayIdx = p.i; view = "train"; render(); window.scrollTo(0,0); };
+  const del = c.querySelector("#rs-del"); del.disabled = true; setTimeout(() => { del.disabled = false; }, 600);
+  del.onclick = () => { close(); clearDay(p.day); renderHome(); toast("Listo, ese entreno empieza de cero"); };
+}
 function saveHist(){ store.set("cx-hist-" + code, hist); trackDeleted(); queueSync(); }
 function render(){ view === "hist" ? renderHistory() : view === "train" ? renderSession() : renderHome(); }
 
@@ -1210,6 +1249,14 @@ function renderHome(){
     : since <= 2 ? "Te toca este. Hazlo cuando mejor te venga."
     : `Lo tienes guardado desde hace ${since} días. No se pierde nada: lo retomas cuando puedas y seguimos desde aquí.`;
   const others = cl.days.map((d,i) => ({d,i})).filter(x => x.i !== ni);
+  const pend = pendingDay(), pts = store.get("cx-logts-" + code);
+  const pAgo = !pts ? "" : (d => d === 0 ? " de hoy" : d === 1 ? " de ayer" : ` del ${shortDate(pts)}`)(Math.round((startOf(now) - startOf(pts)) / 864e5));
+  const resumeHTML = pend ? `<div class="resume" role="status">
+      <h3>⏸️ Tienes un entreno a medias</h3>
+      <p><b>${esc(pend.day.label)}</b>${pAgo} · ${pend.done} de ${pend.total} series hechas. Todo lo que apuntaste sigue guardado.</p>
+      <button class="btn" id="resume-go">Sí, continuarlo</button>
+      <button class="undo" id="resume-new">No, empezar de cero</button>
+    </div>` : "";
 
   app.innerHTML = headerHTML("") + `
   <section class="home">
@@ -1220,6 +1267,7 @@ function renderHome(){
       <p>${took ? "Creatina hecha. Ahora toca darle duro." : "Marca tu creatina y vamos a entrenar."}</p>
     </div>
 
+    ${resumeHTML}
     <div class="blk-title">Check-in de hoy</div>
     <button class="checkin" id="crea" aria-pressed="${took}">
       <span class="box" aria-hidden="true">✓</span>
@@ -1249,6 +1297,10 @@ function renderHome(){
     store.set("cx-crea-" + code, crea); markKeys();
     renderHome();
   };
+  if (pend){
+    document.getElementById("resume-go").onclick = () => { dayIdx = pend.i; view = "train"; render(); window.scrollTo(0,0); };
+    document.getElementById("resume-new").onclick = () => confirmRestart(pend);
+  }
   document.getElementById("go-train").onclick = () => { dayIdx = ni; view = "train"; render(); window.scrollTo(0,0); };
   app.querySelectorAll(".alt-b").forEach(b => b.onclick = () => { dayIdx = +b.dataset.i; view = "train"; render(); window.scrollTo(0,0); });
 }
@@ -1615,7 +1667,7 @@ function mailRow(sh, e, getRep, base, auto){
       <input id="mail-in" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="tu@mail.com" value="${esc(m0)}">
       <p class="mail-err" id="mail-err" hidden>Revisa el mail, parece que falta algo.</p>
       <div class="mail-acts"><button class="btn" id="mail-ok">Guardar</button>${m0 ? `<button class="mail-l" id="mail-del">Quitar mail</button>` : ""}<button class="mail-l" id="mail-no">Ahora no</button></div>
-      <p class="mail-pp">Solo se usa para mandarte tus informes. Puedes cambiarlo o quitarlo cuando quieras.</p></div>`;
+      <p class="mail-pp">🔒 Tu mail solo lo usa Cristian para mandarte tus informes de entreno. No se comparte con nadie ni se usa para publicidad. Puedes cambiarlo o quitarlo aquí cuando quieras, o pedirle a Cris que lo borre.</p></div>`;
     const inp = box.querySelector("#mail-in"); inp.focus();
     box.querySelector("#mail-no").onclick = () => paint();
     const del = box.querySelector("#mail-del");
