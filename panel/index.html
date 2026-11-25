@@ -68,7 +68,7 @@ h1,h2,h3{margin:0}
 .st{background:var(--surface);border-radius:14px;padding:10px}
 .st small{display:block;font-size:11.5px;color:var(--muted)}
 .st b{font-size:17px}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin:14px 0 10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin:14px 0 10px}
 .tabs button{border:0;background:none;border-radius:10px;padding:9px;font-weight:700;color:var(--muted)}
 .tabs button[aria-selected="true"]{background:var(--surface-2);color:var(--fg)}
 .si{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:var(--surface);border:0;border-radius:14px;padding:12px 14px;text-align:left;width:100%}
@@ -110,6 +110,54 @@ h1,h2,h3{margin:0}
 .tp.t-top{color:var(--accent)} .tp.t-bo{color:#8fb0ff} .tp.t-bo2{color:#c3b5ff} .tp.t-aprox{color:var(--muted)}
 .note{font-size:13px;color:var(--muted);margin:6px 0 0}
 .load{color:var(--muted);text-align:center;padding:40px 0}
+/* Rutinas */
+.fl{display:flex;flex-direction:column;gap:5px;margin:8px 0}
+.fl span{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.fl input,.fl select,.fl textarea,.inp,.srow input,.srow select{font:500 16px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
+.fl textarea{resize:vertical;line-height:1.35}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tg{display:flex;align-items:center;gap:10px;font-size:14.5px;margin:10px 0}
+.tg input{width:20px;height:20px;accent-color:var(--accent)}
+.savebtn{border:0;border-radius:12px;background:var(--accent);color:#1a1205;font-weight:800;padding:9px 16px}
+.savebtn:disabled{background:var(--surface-2);color:var(--muted)}
+.ed-head{margin-bottom:8px}
+.day{background:var(--surface);border-radius:18px;padding:12px;margin-top:12px}
+.day-h{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.day-l{flex:1;min-width:0;font:800 17px var(--display);color:var(--fg);background:none;border:0;border-bottom:1px dashed var(--line);padding:6px 2px;text-transform:uppercase}
+.exl{display:flex;flex-direction:column;gap:6px}
+.exr{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:stretch}
+.exb{background:var(--surface-2);border:0;border-radius:12px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:0}
+.exn{font-weight:700;font-size:15px}
+.exs{font-size:12.5px;color:var(--muted)}
+.mv{display:flex;flex-direction:column;gap:4px}
+.mv button,.mini{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-weight:700;font-size:13px}
+.mv button{flex:1;padding:0 12px}
+.mv button:disabled,.mini:disabled{opacity:.3}
+.mini.acc{border-color:var(--accent);color:var(--accent)}
+.add{width:100%;margin-top:8px;background:none;border:1px dashed rgba(255,138,61,.5);color:var(--accent);border-radius:12px;padding:10px;font-weight:700}
+.rec{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:0}
+.rec.top{background:#3ddc84} .rec.topbo{background:var(--accent)}
+.srow{display:grid;grid-template-columns:1.1fr 1.3fr .8fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.srow input,.srow select{padding:9px 8px;font-size:15px}
+.qk{display:flex;gap:6px;margin:2px 0 6px}
+.link{background:none;border:0;color:var(--accent);font-weight:600;padding:4px 0;font-size:14px;text-decoration:underline}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);border-radius:12px;padding:10px 12px}
+.opt > span:last-child{display:flex;gap:6px;flex-shrink:0}
+.danger{width:100%;background:none;border:0;color:var(--bad);font-weight:700;padding:14px;margin-top:4px}
+.menu{display:flex;flex-direction:column;gap:6px}
+.menu button{background:var(--surface);border:0;border-radius:12px;padding:14px;text-align:left;font-weight:600}
+.menu button:disabled{opacity:.35}
+.menu .danger{text-align:left;color:var(--bad);margin:0;background:var(--surface)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chip{flex-shrink:0;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);color:#1a1205;border-color:var(--accent)}
+.li{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:var(--surface);border:0;border-radius:12px;padding:11px 12px;margin-bottom:6px}
+.li small{color:var(--muted);font-size:12.5px}
+.ov{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.ov li span small{color:var(--muted)}
+.ov li > small{display:block;color:var(--muted);font-size:12.5px}
+.code{font:900 40px var(--display);letter-spacing:.08em;text-align:center;color:var(--accent);margin:10px 0 16px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--fg);color:#111;font-weight:700;padding:11px 16px;border-radius:12px;z-index:50;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
@@ -214,6 +262,7 @@ function clientRows(){
 /* ---------- Pantalla principal: actividad ---------- */
 function render(){
   if (!key) return renderLogin();
+  if (ed) return renderEditor();
   if (sel) return renderClient();
   const head = `<header class="top">
     <div class="top-row"><div class="brand">Panel <span>Cris</span></div><button class="icon-b" id="ref">↻ Actualizar</button></div>
@@ -233,6 +282,7 @@ function render(){
       ${chip("r", "r", n.r, "7+ días sin entrenar")}
       ${chip("n", "n", n.n, "sin empezar")}
     </div>
+    <button class="ghost" id="nuevo" style="margin-bottom:6px">＋ Nuevo cliente en ${esc(APPS.find(a => a.id === appId).label)}</button>
     <div class="blk">${filter === "all" ? "Todos los clientes" : `Filtrando · <button class="back" id="all" style="padding:0;font-size:12px;letter-spacing:0;text-transform:none;text-decoration:underline">ver todos</button>`}</div>
     <div class="cl">${list.map(r => `<button class="ci" data-c="${esc(r.code)}">
       <span class="dot ${r.st}"></span>
@@ -242,6 +292,7 @@ function render(){
   wireTop(); paintUpd();
   app.querySelectorAll(".sum button").forEach(b => b.onclick = () => { filter = filter === b.dataset.f ? "all" : b.dataset.f; render(); });
   const all = document.getElementById("all"); if (all) all.onclick = () => { filter = "all"; render(); };
+  document.getElementById("nuevo").onclick = () => newClientForm();
   app.querySelectorAll(".ci").forEach(b => b.onclick = () => { sel = b.dataset.c; ctab = "ses"; openEx = null; render(); window.scrollTo(0,0); });
 }
 function wireTop(){
@@ -254,6 +305,7 @@ function wireTop(){
 
 /* ---------- Ficha del cliente ---------- */
 function renderClient(){
+  if (!data){ app.innerHTML = `<div class="load">Cargando…</div>`; return; }
   const r = clientRows().find(x => x.code === sel);
   if (!r){ sel = null; return render(); }
   const tot = r.ses.length, d28 = r.ses.filter(s => daysAgo(s.ts) < 28).length;
@@ -267,11 +319,13 @@ function renderClient(){
     <div class="tabs" role="tablist">
       <button role="tab" data-t="ses" aria-selected="${ctab === "ses"}">Sesiones (${tot})</button>
       <button role="tab" data-t="prog" aria-selected="${ctab === "prog"}">Progreso</button>
+      <button role="tab" data-t="rut" aria-selected="${ctab === "rut"}">Rutina</button>
     </div>
     <div id="body"></div>`;
   document.getElementById("bk").onclick = () => { sel = null; render(); window.scrollTo(0,0); };
   app.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { ctab = b.dataset.t; renderClient(); });
   const body = document.getElementById("body");
+  if (ctab === "rut") return routineTab(r, body);
   if (ctab === "ses") body.innerHTML = sessionsHTML(r), body.querySelectorAll(".si").forEach(b => b.onclick = () => openSession(r, r.ses[+b.dataset.i]));
   else { body.innerHTML = progressHTML(r); body.querySelectorAll(".pg-h").forEach(b => b.onclick = () => { openEx = openEx === b.dataset.n ? null : b.dataset.n; const y = window.scrollY; renderClient(); window.scrollTo(0, y); }); }
 }
@@ -349,6 +403,416 @@ function openSession(r, s){
   const close = () => sh.remove();
   sh.querySelector("#cl").onclick = close;
   sh.addEventListener("click", e => { if (e.target === sh) close(); });
+}
+
+/* =====================================================================
+   RUTINAS: ver, modificar y crear clientes nuevos
+   La rutina vive en la hoja (pestaña Rutinas). Al guardar, la versión anterior
+   queda en la pestaña "Historial rutinas". El cliente la recibe al abrir su app.
+   ===================================================================== */
+const GYMS = ["VivaGym", "FitnessPark", "Otro gimnasio", "Casa"];
+const STYPE = { top: "Top set", bo: "Back-off", bo2: "Back-off 2", ok: "Hecho" };
+const SSHORT = { top: "Top", bo: "BO", bo2: "BO2", ok: "✓" };
+const RECS = [["", "No grabar"], ["top", "Grabar top set (verde)"], ["topbo", "Grabar top set y back-off (naranja)"]];
+const RIRS = ["0", "1", "2", "+2"];
+let ed = null;                       /* { code, app, name, client, ver, isNew, dirty } */
+let lib = store.get("cp-lib");       /* biblioteca de ejercicios (solo panel) */
+const routCache = {};
+const clone = o => JSON.parse(JSON.stringify(o));
+const $ = id => document.getElementById(id);
+const defGym = a => a === "CristianEntrenador" ? "VivaGym" : "Otro gimnasio";
+const ytId = u => { u = String(u || "").trim(); const m = u.match(/(?:shorts\/|[?&]v=|youtu\.be\/|embed\/)([\w-]{6,})/); return m ? m[1] : (/^[\w-]{8,15}$/.test(u) ? u : ""); };
+const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const VIVA_SPOT = /\((al lado|zona de|maquina al lado|cerca de)/;
+
+function toast(msg){
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+/* Hoja inferior apilable (se puede abrir una encima de otra) */
+function sheet(html){
+  const sh = document.createElement("div"); sh.className = "sheet";
+  sh.innerHTML = `<div class="sheet-in" role="dialog">${html}</div>`;
+  document.body.appendChild(sh);
+  sh.close = () => sh.remove();
+  sh.addEventListener("click", e => { if (e.target === sh && !sh.sticky) sh.close(); });
+  return sh;
+}
+
+/* ---------- Biblioteca ---------- */
+async function loadLib(force){
+  if (lib && !force) return lib;
+  const r = await api({ action: "panelLib", key });
+  if (r && r.ok){ lib = r.lib; store.set("cp-lib", lib); return lib; }
+  if (r && r.error === "accion") throw new Error("script");
+  throw new Error("lib");
+}
+const libFind = n => (lib || []).find(it => norm(it.n) === norm(n));
+function gymOk(it, gym){
+  if (it.gym){
+    const g = norm(gym);
+    return norm(it.gym).split(/[,;/]/).map(x => x.trim()).some(x => x && (x === "todos" || g.indexOf(x) === 0));
+  }
+  if (gym === "VivaGym") return true;
+  if (VIVA_SPOT.test(norm(it.n))) return false;          /* sitios concretos de VivaGym */
+  if (gym === "Casa") return /casa|peso corporal|banda|colchoneta|mancuerna/i.test(it.m);
+  return true;
+}
+/* Ejercicio de la biblioteca → formato de la app */
+function fromLib(it, ctx){
+  const ex = { name: it.n, rir: "2", cues: [], sets: [{ type: "top", target: "10 reps" }, { type: "bo", target: "10 reps" }] };
+  const v = ytId(it.v); if (v) ex.video = v;
+  if (ctx.gym === "VivaGym" && it.f) ex.img = it.f;
+  const no = it.no || "";
+  if (/por tiempo/i.test(no)){ ex.check = true; delete ex.rir; ex.sets = [{ type: "ok", target: "30 segundos" }]; }
+  if (/^unilateral/i.test(no)){ ex.uni = true; ex.limb = /cuadr|isquio|glute|gemel|aduct|abduct|pierna/.test(norm(it.g + " " + no)) ? "Pierna" : "Brazo"; }
+  const setup = no.split(/\.\s+/).map(s => s.trim().replace(/\.$/, ""))
+    .filter(s => s && !/^(unilateral|por tiempo|sin kg|sin peso|variante|plan b|reps por pierna|maquina con o sin)/.test(norm(s))).join(". ");
+  if (setup) ex.setup = setup;
+  if (/^sentadilla bulgara con mancuernas/.test(norm(it.n)) && !/letizia/.test(norm(ctx.name))){
+    const m = "el peso siempre será el de una sola mancuerna a pesar de ser dos";
+    if (ctx.app === "CristianEntrenador") ex.memo = [m]; else ex.cues = [m];
+  }
+  /* En VivaGym (CristianEntrenador) va con su opción B habitual */
+  if (ctx.app === "CristianEntrenador" && it.b){
+    const b = libFind(it.b);
+    if (b && gymOk(b, ctx.gym)) ex.alt = altFrom(b, ex, ctx);
+  }
+  return ex;
+}
+function altFrom(it, ex, ctx){
+  const o = { name: it.n };
+  if (ctx.gym === "VivaGym" && it.f) o.img = it.f;
+  const v = ytId(it.v); if (v && v !== ex.video) o.video = v;
+  o.sets = ex.sets.map(s => ({ type: s.type, target: s.target }));
+  return o;
+}
+/* La opción B/C copia las series de la A (conserva lo que hizo la semana pasada si estaba) */
+function syncAlts(ex){
+  ["alt", "alt2"].forEach(k => {
+    const o = ex[k]; if (!o) return;
+    const old = o.sets || [];
+    o.sets = ex.sets.map((s, i) => { const n = { type: s.type, target: s.target }; if (s.rir != null) n.rir = s.rir; if (old[i] && old[i].prev && old[i].type === s.type) n.prev = old[i].prev; return n; });
+  });
+}
+const setsTxt = ex => (ex.sets || []).map(s => `${SSHORT[s.type] || s.type} ${String(s.target || "").replace(/\s*reps?$/i, "")}`).join(" · ");
+
+/* ---------- Pestaña "Rutina" de la ficha ---------- */
+async function getRoutine(code, force){
+  if (routCache[code] && !force) return routCache[code];
+  const r = await api({ action: "panelRoutine", key, app: appId, code });
+  if (r && r.ok){ routCache[code] = r; return r; }
+  if (r && r.error === "clave"){ store.del("cp-key"); key = null; renderLogin("La clave cambió. Ponla de nuevo."); return null; }
+  throw new Error(r && r.error === "accion" ? "script" : "api");
+}
+async function routineTab(r, body){
+  body.innerHTML = `<div class="load">Cargando rutina…</div>`;
+  let res;
+  try { res = await getRoutine(r.code, true); } catch(e){
+    body.innerHTML = `<div class="empty">${e.message === "script" ? "Falta actualizar el código de la hoja (Apps Script) para poder editar rutinas." : "No se pudo cargar la rutina. Revisa la conexión."}</div>`; return;
+  }
+  if (!res || sel !== r.code || ctab !== "rut") return;
+  const c = res.client;
+  body.innerHTML = `<button class="btn" id="edit">✏️ Modificar rutina</button>
+    <p class="note" style="margin:8px 0 12px">${esc(c.gym || defGym(appId))}${c.block ? ` · ${esc(c.block)}` : ""}</p>
+    <div class="cl">${c.days.map(d => `<div class="pg"><b>${esc(d.label)}</b>
+      <ol class="ov">${d.exercises.map(ex => `<li><span>${esc(ex.name)}${ex.alt ? `<small> · B: ${esc(ex.alt.name)}</small>` : ""}</span><small>${esc(setsTxt(ex))}</small></li>`).join("")}</ol></div>`).join("")}</div>`;
+  $("edit").onclick = () => { ed = { code: r.code, app: appId, name: res.name, client: clone(c), ver: res.ver, dirty: false }; render(); window.scrollTo(0,0); };
+}
+
+/* ---------- Cliente nuevo ---------- */
+function newClientForm(){
+  const rows = data ? data.clients : [];
+  const sh = sheet(`<div class="sh-h"><div><h3>Nuevo cliente</h3><p>${esc(appId)}</p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <label class="fl"><span>Nombre (como lo verá en la app)</span><input id="nn" autocomplete="off" placeholder="Ej.: Laura"></label>
+    <label class="fl"><span>¿Dónde va a entrenar?</span><select id="ng">${GYMS.map(g => `<option ${g === defGym(appId) ? "selected" : ""}>${g}</option>`).join("")}</select></label>
+    <label class="fl"><span>Empezar con</span><select id="nb"><option value="">Rutina vacía</option>${rows.map(x => `<option value="${esc(x.code)}">Copia de la rutina de ${esc(x.name)}</option>`).join("")}</select></label>
+    <p class="note">El código de acceso se crea al guardar y se apunta solo en "Clientes y PIN".</p>
+    <p class="err" id="ne" hidden></p>
+    <button class="btn" id="ngo">Seguir → armar la rutina</button>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  $("nn").focus();
+  $("ngo").onclick = async () => {
+    const name = $("nn").value.trim(), gym = $("ng").value, base = $("nb").value, err = $("ne");
+    if (!name){ err.hidden = false; err.textContent = "Pon el nombre."; return; }
+    let client = { name, block: "Semana 1", seedVer: 1, fresh: true, gym, days: [{ id: "D1", label: "Día 1", exercises: [] }] };
+    if (appId === "Crisxlift") client.weekly = [];
+    if (base){
+      $("ngo").disabled = true; $("ngo").textContent = "Copiando…";
+      try {
+        const src = clone((await getRoutine(base)).client);
+        ["lastWeek", "histFix", "setupFix", "creatina", "weekly"].forEach(k => delete src[k]);
+        src.days.forEach(d => { delete d.lastWeek; d.exercises.forEach(ex => [ex, ex.alt, ex.alt2].forEach(o => o && (o.sets || []).forEach(s => delete s.prev))); });
+        client = Object.assign(src, { name, block: "Semana 1", seedVer: 1, fresh: true, gym });
+        if (appId === "Crisxlift") client.weekly = [];
+      } catch(e){ err.hidden = false; err.textContent = "No se pudo copiar esa rutina."; $("ngo").disabled = false; $("ngo").textContent = "Seguir → armar la rutina"; return; }
+    }
+    sh.close();
+    ed = { code: null, app: appId, name, client, isNew: true, dirty: true };
+    render(); window.scrollTo(0,0);
+  };
+}
+
+/* ---------- Editor de rutina ---------- */
+function dirty(){ ed.dirty = true; const b = $("eds"); if (b) b.disabled = false; }
+function renderEditor(){
+  const c = ed.client, gym = c.gym || defGym(ed.app);
+  app.innerHTML = `<header class="top"><div class="top-row">
+      <button class="back" id="edx">‹ ${ed.isNew ? "Cancelar" : "Volver"}</button>
+      <button class="savebtn" id="eds" ${ed.dirty ? "" : "disabled"}>${ed.isNew ? "Crear perfil" : "Guardar"}</button></div></header>
+    <div class="ed-head">
+      <label class="fl"><span>Nombre</span><input id="edn" value="${esc(ed.name)}" autocomplete="off"></label>
+      <div class="row2">
+        <label class="fl"><span>Bloque / semana</span><input id="edb" value="${esc(c.block || "")}" placeholder="Semana 1"></label>
+        <label class="fl"><span>Gimnasio</span><select id="edg">${GYMS.map(g => `<option ${g === gym ? "selected" : ""}>${g}</option>`).join("")}</select></label>
+      </div>
+      ${ed.app === "CristianEntrenador" ? `<label class="tg"><input type="checkbox" id="edc" ${c.creatina ? "checked" : ""}> Check-in de creatina en el inicio</label>` : ""}
+      <p class="note">${esc(ed.app)} · ${ed.code ? `código ${esc(ed.code)}` : "el código se crea al guardar"}</p>
+    </div>
+    ${c.days.map((d, di) => `<section class="day">
+      <div class="day-h"><input class="day-l" data-d="${di}" value="${esc(d.label)}" aria-label="Nombre del día"><button class="icon-b" data-dm="${di}" aria-label="Opciones del día">⋯</button></div>
+      ${d.home ? `<p class="note" style="margin:0 0 6px">🏠 Día en casa</p>` : ""}
+      <div class="exl">${d.exercises.map((ex, ei) => `<div class="exr">
+        <button class="exb" data-d="${di}" data-e="${ei}"><span class="exn">${ei + 1}. ${esc(ex.name)}</span>
+          <span class="exs">${esc(setsTxt(ex))}${ex.rir != null && !ex.check ? ` · RIR ${esc(ex.rir)}` : ""}${ex.rec ? ` · <i class="rec ${esc(ex.rec)}"></i>` : ""}</span>
+          ${ex.alt ? `<span class="exs">B: ${esc(ex.alt.name)}${ex.alt2 ? ` · C: ${esc(ex.alt2.name)}` : ""}</span>` : ""}</button>
+        <div class="mv"><button data-mv="-1" data-d="${di}" data-e="${ei}" ${ei ? "" : "disabled"} aria-label="Subir">↑</button><button data-mv="1" data-d="${di}" data-e="${ei}" ${ei < d.exercises.length - 1 ? "" : "disabled"} aria-label="Bajar">↓</button></div>
+      </div>`).join("") || `<p class="note" style="margin:4px 0 8px">Todavía sin ejercicios.</p>`}</div>
+      ${(d.warm || []).length || (d.cool || []).length ? `<p class="note">${(d.warm || []).length ? `Calentamiento: ${d.warm.map(w => esc(w.n)).join(", ")}` : ""}${(d.warm || []).length && (d.cool || []).length ? "<br>" : ""}${(d.cool || []).length ? `${esc(d.coolTitle || "Para terminar")}: ${d.cool.map(w => esc(w.n)).join(", ")}` : ""}</p>` : ""}
+      <button class="add" data-add="${di}">＋ Añadir ejercicio</button>
+    </section>`).join("")}
+    <button class="ghost" id="addday" style="margin-top:12px">＋ Añadir día</button>
+    <div style="height:30px"></div>`;
+
+  $("edx").onclick = () => { if (ed.dirty && !confirm(ed.isNew ? "¿Descartar este cliente nuevo?" : "Tienes cambios sin guardar. ¿Salir igualmente?")) return; ed = null; render(); };
+  $("eds").onclick = saveEd;
+  $("edn").oninput = e => { ed.name = e.target.value; dirty(); };
+  $("edb").oninput = e => { c.block = e.target.value; dirty(); };
+  $("edg").onchange = e => { c.gym = e.target.value; dirty(); };
+  if ($("edc")) $("edc").onchange = e => { if (e.target.checked) c.creatina = true; else delete c.creatina; dirty(); };
+  app.querySelectorAll(".day-l").forEach(i => i.oninput = () => { c.days[+i.dataset.d].label = i.value; dirty(); });
+  app.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => {
+    const ex = c.days[+b.dataset.d].exercises, i = +b.dataset.e, j = i + +b.dataset.mv;
+    [ex[i], ex[j]] = [ex[j], ex[i]]; dirty(); const y = scrollY; renderEditor(); scrollTo(0, y);
+  });
+  app.querySelectorAll(".exb").forEach(b => b.onclick = () => openExercise(+b.dataset.d, +b.dataset.e));
+  app.querySelectorAll("[data-add]").forEach(b => b.onclick = () => {
+    const di = +b.dataset.add;
+    openPicker(it => { const ex = it ? fromLib(it, ctxEd()) : null; if (!ex) return; ex._t = 1; c.days[di].exercises.push(ex); dirty(); const y = scrollY; renderEditor(); scrollTo(0, y); openExercise(di, c.days[di].exercises.length - 1); });
+  });
+  app.querySelectorAll("[data-dm]").forEach(b => b.onclick = () => dayMenu(+b.dataset.dm));
+  $("addday").onclick = () => {
+    let id; do { id = "D" + Math.random().toString(36).slice(2, 6).toUpperCase(); } while (c.days.some(d => d.id === id));
+    c.days.push({ id, label: `Día ${c.days.length + 1}`, exercises: [] }); dirty(); renderEditor(); scrollTo(0, document.body.scrollHeight);
+  };
+}
+const ctxEd = () => ({ gym: ed.client.gym || defGym(ed.app), app: ed.app, name: ed.name });
+
+function dayMenu(di){
+  const c = ed.client, d = c.days[di];
+  const sh = sheet(`<div class="sh-h"><div><h3>${esc(d.label)}</h3></div><button class="icon-b" data-x>Cerrar</button></div>
+    <div class="menu">
+      <button data-a="up" ${di ? "" : "disabled"}>↑ Subir este día</button>
+      <button data-a="dn" ${di < c.days.length - 1 ? "" : "disabled"}>↓ Bajar este día</button>
+      <button data-a="dup">⧉ Duplicar día</button>
+      <button data-a="wc">🔥 Calentamiento y final del día</button>
+      ${ed.app === "CristianEntrenador" ? `<button data-a="home">${d.home ? "🏋️ Quitar «día en casa»" : "🏠 Marcar como día en casa (sin aviso de opción B)"}</button>` : ""}
+      <button data-a="del" class="danger">🗑 Borrar día</button>
+    </div>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  sh.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+    const a = b.dataset.a;
+    if (a === "up" || a === "dn"){ const j = di + (a === "up" ? -1 : 1); [c.days[di], c.days[j]] = [c.days[j], c.days[di]]; }
+    if (a === "dup"){ const n = clone(d); let id; do { id = "D" + Math.random().toString(36).slice(2, 6).toUpperCase(); } while (c.days.some(x => x.id === id)); n.id = id; n.label = d.label + " (copia)"; delete n.lastWeek; n.exercises.forEach(ex => [ex, ex.alt, ex.alt2].forEach(o => o && (o.sets || []).forEach(s => delete s.prev))); c.days.splice(di + 1, 0, n); }
+    if (a === "home"){ if (d.home) delete d.home; else d.home = true; }
+    if (a === "del"){ if (c.days.length < 2){ toast("La rutina necesita al menos un día"); return; } if (!confirm(`¿Borrar «${d.label}»?`)) return; c.days.splice(di, 1); }
+    if (a === "wc"){ sh.close(); return warmCool(di); }
+    sh.close(); dirty(); renderEditor();
+  });
+}
+function warmCool(di){
+  const d = ed.client.days[di];
+  const txt = arr => (arr || []).map(w => [w.n, w.t, w.url].filter(Boolean).join(" | ")).join("\n");
+  const parse = t => t.split("\n").map(l => l.split("|").map(x => x.trim())).filter(p => p[0]).map(([n, t, url]) => { const o = { n }; if (t) o.t = t; if (url) o.url = url; return o; });
+  const sh = sheet(`<div class="sh-h"><div><h3>Calentamiento y final</h3><p>${esc(d.label)}</p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <p class="note">Uno por línea: <b>nombre | tiempo | enlace</b> (el tiempo y el enlace son opcionales).</p>
+    <label class="fl"><span>Calentamiento</span><textarea id="ww" rows="3" placeholder="Movilidad de cadera | 1 min | https://youtube.com/shorts/…">${esc(txt(d.warm))}</textarea></label>
+    <label class="fl"><span>Título del final</span><input id="wt" value="${esc(d.coolTitle || "")}" placeholder="Para terminar"></label>
+    <label class="fl"><span>Final</span><textarea id="wc" rows="3" placeholder="Cinta con la inclinación al máximo | 10 min">${esc(txt(d.cool))}</textarea></label>
+    <button class="btn" id="wok">Listo</button>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  $("wok").onclick = () => {
+    const w = parse($("ww").value), cl = parse($("wc").value), t = $("wt").value.trim();
+    if (w.length) d.warm = w; else delete d.warm;
+    if (cl.length) d.cool = cl; else delete d.cool;
+    if (t) d.coolTitle = t; else delete d.coolTitle;
+    sh.close(); dirty(); renderEditor();
+  };
+}
+
+/* ---------- Ficha de un ejercicio ---------- */
+function openExercise(di, ei){
+  const day = ed.client.days[di], x = clone(day.exercises[ei]), ctx = ctxEd(), CE = ed.app === "CristianEntrenador";
+  const sh = sheet(""); sh.sticky = true;
+  const box = sh.firstElementChild;
+  const libIt = () => libFind(x.name);
+  function collect(){
+    const q = s => box.querySelector(s);
+    x.name = q("#xn").value.trim() || x.name;
+    x.sets = [...box.querySelectorAll(".srow")].map(r => {
+      const o = { type: r.querySelector("select.st").value, target: r.querySelector("input").value.trim() };
+      const rr = r.querySelector("select.sr"); if (rr && rr.value !== "") o.rir = rr.value;
+      const old = x.sets[+r.dataset.i]; if (old && old.prev && old.type === o.type) o.prev = old.prev;
+      return o;
+    });
+    if (!x.check){ const v = q("#xr").value; if (v) x.rir = v; else delete x.rir; }
+    const rec = q("#xrec").value; if (rec) x.rec = rec; else delete x.rec;
+    const su = q("#xsu").value.trim(); if (su) x.setup = su; else delete x.setup;
+    x.cues = q("#xcu").value.split("\n").map(s => s.trim()).filter(Boolean);
+    if (q("#xme")){ const me = q("#xme").value.split("\n").map(s => s.trim()).filter(Boolean); if (me.length) x.memo = me; else delete x.memo; }
+    const vs = q("#xv").value, vo = q("#xvo").value.trim();
+    const vid = vs === "__otro" ? ytId(vo) : vs; if (vid) x.video = vid; else if (vs === "") delete x.video;
+    if (x.uni){ x.limb = q("#xl").value; }
+  }
+  function paint(){
+    const it = libIt(), vids = [];
+    if (it) [it.v, ...(it.va || [])].map(ytId).filter(Boolean).forEach(v => vids.includes(v) || vids.push(v));
+    if (x.video && !vids.includes(x.video)) vids.unshift(x.video);
+    const sug = it && it.b && !x.alt ? libFind(it.b) : null;
+    const optBox = (k, L) => x[k]
+      ? `<div class="opt"><span><b>${esc(x[k].name)}</b>${x[k].img ? " 📷" : ""}</span><span><button class="mini" data-op="ch-${k}">Cambiar</button><button class="mini" data-op="rm-${k}">Quitar</button></span></div>`
+      : `<div class="opt"><span class="note" style="margin:0">Sin opción ${L}</span><span>${k === "alt" && sug ? `<button class="mini acc" data-op="sug">＋ ${esc(sug.n)}</button>` : ""}<button class="mini" data-op="ch-${k}">＋ Elegir</button></span></div>`;
+    box.innerHTML = `<div class="sh-h"><div><h3>${esc(day.label)}</h3><p>Ejercicio ${ei + 1} de ${day.exercises.length}</p></div><button class="icon-b" id="xc">Cancelar</button></div>
+      <label class="fl"><span>Nombre</span><input id="xn" value="${esc(x.name)}"></label>
+      <button class="link" id="xsw">⇄ Cambiar por otro de la biblioteca</button>
+      <div class="blk">Series</div>
+      <div id="xs">${x.sets.map((s, i) => `<div class="srow" data-i="${i}">
+        <select class="st" aria-label="Tipo">${(x.check ? ["ok"] : ["top", "bo", "bo2"]).map(t => `<option value="${t}" ${t === s.type ? "selected" : ""}>${STYPE[t]}</option>`).join("")}</select>
+        <input value="${esc(s.target || "")}" placeholder="${x.check ? "30 segundos" : "8–10 reps"}" aria-label="Objetivo">
+        ${x.check ? "" : `<select class="sr" aria-label="RIR de la serie"><option value="">RIR =</option>${RIRS.map(r => `<option ${String(s.rir) === r ? "selected" : ""}>${r}</option>`).join("")}</select>`}
+        <button class="mini" data-rm="${i}" aria-label="Quitar serie" ${x.sets.length > 1 ? "" : "disabled"}>✕</button></div>`).join("")}</div>
+      ${x.check ? "" : `<div class="qk"><button class="mini" id="xadd">＋ Serie</button><button class="mini" id="xsame">Mismas reps en todas</button></div>`}
+      <div class="row2">
+        ${x.check ? "<span></span>" : `<label class="fl"><span>RIR del ejercicio</span><select id="xr"><option value="">—</option>${RIRS.map(r => `<option ${String(x.rir) === r ? "selected" : ""}>${r}</option>`).join("")}</select></label>`}
+        <label class="fl"><span>Grabación</span><select id="xrec">${RECS.map(([v, t]) => `<option value="${v}" ${(x.rec || "") === v ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      </div>
+      <label class="tg"><input type="checkbox" id="xuni" ${x.uni ? "checked" : ""}> Unilateral (un lado y después el otro)</label>
+      ${x.uni ? `<label class="fl"><span>Lado</span><select id="xl">${["Pierna", "Brazo"].map(l => `<option ${(x.limb || "Brazo") === l ? "selected" : ""}>${l}</option>`).join("")}</select></label>` : ""}
+      <label class="tg"><input type="checkbox" id="xck" ${x.check ? "checked" : ""}> Por tiempo / solo marcar hecho (sin kg ni reps)</label>
+      <label class="fl"><span>Setup / ajuste</span><input id="xsu" value="${esc(x.setup || "")}" placeholder="Ej.: Banco a 30°"></label>
+      <label class="fl"><span>Indicaciones (en «Ver ejercicio», una por línea)</span><textarea id="xcu" rows="2">${esc((x.cues || []).join("\n"))}</textarea></label>
+      ${CE ? `<label class="fl"><span>Nota bajo el nombre (una por línea)</span><textarea id="xme" rows="2">${esc((x.memo || []).join("\n"))}</textarea></label>` : ""}
+      <label class="fl"><span>Vídeo</span><select id="xv"><option value="">Sin vídeo</option>${vids.map((v, i) => `<option value="${esc(v)}" ${v === x.video ? "selected" : ""}>${i === 0 && it && ytId(it.v) === v ? "Vídeo principal" : "Vídeo"} · ${esc(v)}</option>`).join("")}<option value="__otro">Otro enlace…</option></select></label>
+      <input id="xvo" class="inp" placeholder="Pega el enlace de YouTube" hidden>
+      ${it && it.no ? `<p class="note">📚 Biblioteca: ${esc(it.no)}</p>` : ""}
+      <div class="blk">Opción B</div>${optBox("alt", "B")}
+      ${x.alt || x.alt2 ? `<div class="blk">Opción C</div>${optBox("alt2", "C")}` : ""}
+      <button class="btn" id="xok" style="margin-top:16px">Listo</button>
+      <button class="danger" id="xdel">Quitar ejercicio del día</button>`;
+    const q = s => box.querySelector(s);
+    q("#xc").onclick = sh.close;
+    q("#xv").onchange = e => { q("#xvo").hidden = e.target.value !== "__otro"; };
+    q("#xsw").onclick = () => { collect(); openPicker(it2 => {
+      const n = fromLib(it2, ctx); n.sets = x.sets.map(s => ({ type: n.check ? "ok" : (s.type === "ok" ? "top" : s.type), target: s.target })); if (n.check) n.sets = [{ type: "ok", target: x.check ? x.sets[0].target : "30 segundos" }];
+      if (x.rec) n.rec = x.rec; if (x.rir != null && !n.check) n.rir = x.rir;
+      if (!n.alt && x.alt) n.alt = x.alt; if (x.alt2) n.alt2 = x.alt2;
+      Object.keys(x).forEach(k => delete x[k]); Object.assign(x, n); paint();
+    }); };
+    box.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { collect(); x.sets.splice(+b.dataset.rm, 1); paint(); });
+    if (q("#xadd")) q("#xadd").onclick = () => { collect(); const l = x.sets[x.sets.length - 1]; x.sets.push({ type: x.sets.length >= 2 ? "bo2" : "bo", target: l ? l.target : "10 reps" }); paint(); };
+    if (q("#xsame")) q("#xsame").onclick = () => { collect(); const t = x.sets[0] && x.sets[0].target; x.sets.forEach(s => s.target = t); paint(); };
+    q("#xuni").onchange = e => { collect(); if (e.target.checked){ x.uni = true; x.limb = x.limb || "Pierna"; } else { delete x.uni; delete x.limb; } paint(); };
+    q("#xck").onchange = e => { collect(); if (e.target.checked){ x.check = true; delete x.rir; x.sets = [{ type: "ok", target: "30 segundos" }]; } else { delete x.check; x.rir = "2"; x.sets = [{ type: "top", target: "10 reps" }, { type: "bo", target: "10 reps" }]; } paint(); };
+    box.querySelectorAll("[data-op]").forEach(b => b.onclick = () => {
+      collect(); const op = b.dataset.op;
+      if (op === "sug"){ x.alt = altFrom(libFind(libIt().b), x, ctx); return paint(); }
+      const k = op.slice(3);
+      if (op.startsWith("rm-")){ delete x[k]; if (k === "alt" && x.alt2){ x.alt = x.alt2; delete x.alt2; } return paint(); }
+      openPicker(it2 => { x[k] = altFrom(it2, x, ctx); paint(); });
+    });
+    q("#xok").onclick = () => {
+      collect();
+      if (!x.name){ toast("Ponle nombre"); return; }
+      if (!x.sets.length || x.sets.some(s => !s.target)){ toast("Rellena el objetivo de cada serie"); return; }
+      if (!x.cues) x.cues = [];
+      x._t = 1; day.exercises[ei] = x; sh.close(); dirty(); const y = scrollY; renderEditor(); scrollTo(0, y);
+    };
+    q("#xdel").onclick = () => { if (!confirm(`¿Quitar «${x.name}» de ${day.label}?`)) return; day.exercises.splice(ei, 1); sh.close(); dirty(); const y = scrollY; renderEditor(); scrollTo(0, y); };
+  }
+  paint();
+  if (!lib) loadLib().then(() => { if (document.body.contains(sh)){ collect(); paint(); } }).catch(() => {});
+}
+
+/* ---------- Elegir de la biblioteca ---------- */
+function openPicker(onPick){
+  const gym = ctxEd().gym;
+  let q = "", grp = "", all = false;
+  const sh = sheet(`<div class="sh-h"><div><h3>Biblioteca</h3><p id="pg"></p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <input id="pq" class="inp" type="search" placeholder="Buscar ejercicio…" autocomplete="off">
+    <div class="chips" id="pc"></div><div id="pl"><div class="load">Cargando biblioteca…</div></div>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  const pick = it => { sh.close(); onPick(it); };
+  function paint(){
+    if (!lib) return;
+    const base = lib.filter(it => all || gymOk(it, gym));
+    const groups = [...new Set(base.map(it => it.g))];
+    $("pg").innerHTML = `${all ? "Toda la biblioteca" : `Para ${esc(gym)}`} · <button class="link" id="pall" style="padding:0">${all ? `solo ${esc(gym)}` : "ver toda"}</button> · <button class="link" id="pre" style="padding:0">actualizar</button>`;
+    $("pc").innerHTML = [["", "Todos"], ...groups.map(g => [g, g])].map(([v, t]) => `<button class="chip" data-g="${esc(v)}" aria-pressed="${grp === v}">${esc(t)}</button>`).join("");
+    const nq = norm(q), list = base.filter(it => (!grp || it.g === grp) && (!nq || norm(it.n + " " + it.g + " " + it.m).includes(nq)));
+    let last = null;
+    $("pl").innerHTML = list.map(it => { const h = it.g !== last ? `<div class="blk">${esc(it.g)}</div>` : ""; last = it.g;
+      return h + `<button class="li" data-n="${esc(it.n)}"><b>${esc(it.n)}</b><small>${esc(it.m)}${gym === "VivaGym" && it.f ? " · 📷" : ""}${it.v ? " · ▶︎" : ""}${it.b ? ` · B: ${esc(it.b)}` : ""}</small></button>`; }).join("")
+      + (q.trim() ? `<button class="ghost" id="pnew" style="margin-top:10px">＋ Usar «${esc(q.trim())}» (no está en la biblioteca)</button>` : "")
+      + (!list.length && !q.trim() ? `<div class="empty">Nada en este grupo.</div>` : "");
+    $("pall").onclick = () => { all = !all; grp = ""; paint(); };
+    $("pre").onclick = async () => { $("pl").innerHTML = `<div class="load">Actualizando…</div>`; try { await loadLib(true); } catch(e){ toast("No se pudo actualizar"); } paint(); };
+    $("pc").querySelectorAll(".chip").forEach(b => b.onclick = () => { grp = b.dataset.g; paint(); });
+    $("pl").querySelectorAll(".li").forEach(b => b.onclick = () => pick(libFind(b.dataset.n)));
+    if ($("pnew")) $("pnew").onclick = () => pick({ g: "", n: q.trim(), m: "", b: "", v: "", va: [], f: "", no: "" });
+  }
+  $("pq").oninput = e => { q = e.target.value; paint(); };
+  if (lib) paint();
+  loadLib(!!lib).then(paint).catch(e => { if (!lib) $("pl").innerHTML = `<div class="empty">${e.message === "script" ? "Falta actualizar el código de la hoja (Apps Script)." : "No se pudo cargar la biblioteca."}</div>`; });
+}
+
+/* ---------- Guardar ---------- */
+async function saveEd(){
+  const b = $("eds"), name = ed.name.trim(), c = clone(ed.client);
+  if (!name){ toast("Falta el nombre"); return; }
+  const emptyDay = c.days.find(d => !d.exercises.length);
+  if (emptyDay){ toast(`«${emptyDay.label}» no tiene ejercicios`); return; }
+  c.name = name;
+  c.days.forEach(d => d.exercises.forEach(ex => { if (ex._t){ syncAlts(ex); delete ex._t; } }));
+  b.disabled = true; b.textContent = "Guardando…";
+  let r = null;
+  try {
+    r = await api(ed.isNew ? { action: "panelNew", key, app: ed.app, name, client: c }
+                           : { action: "panelSave", key, app: ed.app, code: ed.code, ver: ed.ver, name, client: c });
+  } catch(e){}
+  if (r && r.ok){
+    if (ed.isNew){
+      const code = r.code, app0 = ed.app;
+      ed = null; sel = code; ctab = "rut"; data = null; load(true);
+      const sh = sheet(`<div class="sh-h"><div><h3>Perfil creado ✓</h3><p>${esc(name)} · ${esc(app0)}</p></div><button class="icon-b" data-x>Cerrar</button></div>
+        <p class="note">Su código de acceso (ya está en «Clientes y PIN»):</p>
+        <div class="code">${esc(code)}</div>
+        <button class="btn" id="cp">Copiar código</button>`);
+      sh.querySelector("[data-x]").onclick = sh.close;
+      $("cp").onclick = async () => { try { await navigator.clipboard.writeText(code); toast("Copiado"); } catch(e){ toast(code); } };
+      return;
+    }
+    ed.ver = r.ver; ed.client = c; ed.dirty = false; routCache[ed.code] = null;
+    toast(r.same ? "No había cambios" : "Guardado ✓ Lo verá al abrir su app");
+    renderEditor();
+    api({ action: "panel", key, app: appId }).then(x => { if (x && x.ok) setData(x); }).catch(() => {});
+    return;
+  }
+  b.disabled = false; b.textContent = ed.isNew ? "Crear perfil" : "Guardar";
+  const er = r && r.error;
+  if (er === "clave"){ store.del("cp-key"); key = null; ed = null; renderLogin("La clave cambió. Ponla de nuevo."); return; }
+  alert(er === "cambio" ? "Esta rutina se cambió desde otro sitio mientras la editabas. Sal y vuelve a abrirla para no pisar esos cambios."
+      : er === "accion" ? "Falta actualizar el código de la hoja (Apps Script) para poder guardar rutinas."
+      : r && r.msg ? "No se pudo guardar: " + r.msg : "No se pudo guardar. Revisa la conexión y prueba de nuevo.");
 }
 
 if (key) load(false); else renderLogin();
