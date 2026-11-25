@@ -53,6 +53,7 @@ h1,h2,h3{margin:0}
 .dot.g{background:var(--ok)} .dot.a{background:var(--warn)} .dot.r{background:var(--bad)} .dot.n{background:transparent;border:2px solid var(--muted)}
 .ci-n{font-weight:700;font-size:16px}
 .ci-m{font-size:13px;color:var(--muted)}
+.ci-code{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:7px;background:var(--surface-2);color:var(--accent);font-size:12.5px;font-weight:700;letter-spacing:.06em;font-variant-numeric:tabular-nums;vertical-align:1px}
 .ci-r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .ci-r b{font-size:15px}
 .ci-r small{font-size:12px;color:var(--muted)}
@@ -288,7 +289,7 @@ function render(){
     <div class="blk">${filter === "all" ? "Todos los clientes" : `Filtrando · <button class="back" id="all" style="padding:0;font-size:12px;letter-spacing:0;text-transform:none;text-decoration:underline">ver todos</button>`}</div>
     <div class="cl">${list.map(r => `<button class="ci" data-c="${esc(r.code)}" data-q="${esc(norm(r.name + " " + r.code))}">
       <span class="dot ${r.st}"></span>
-      <span><span class="ci-n">${esc(r.name)}</span><br><span class="ci-m">${r.last ? `${esc(r.last.dayLabel || "")} · ${agoTxt(r.since)}` : "Aún no ha registrado ningún entreno"}</span></span>
+      <span><span class="ci-n">${esc(r.name)}</span><span class="ci-code">${esc(r.code)}</span><br><span class="ci-m">${r.last ? `${esc(r.last.dayLabel || "")} · ${agoTxt(r.since)}` : "Aún no ha registrado ningún entreno"}</span></span>
       <span class="ci-r"><span class="wkb" aria-label="${r.wk} de ${r.days} esta semana">${Array.from({ length: Math.max(r.days, r.wk) }, (_, i) => `<i class="${i < r.wk ? "on" : ""}"></i>`).join("")}</span><small>${r.wk}/${r.days} semana</small></span>
     </button>`).join("") || `<div class="empty">Nadie en este grupo 🙌</div>`}</div>`;
   wireTop(); paintUpd();
