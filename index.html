@@ -497,6 +497,31 @@ input,textarea{caret-color:var(--accent)}
 .ex:has(.set.done):not(:has(.set:not(.done))){box-shadow:inset 0 0 0 1.5px rgba(83,211,166,.45),0 10px 24px -14px rgba(0,0,0,.6)}
 .ex:has(.set.done):not(:has(.set:not(.done))) .ex-idx::after{content:" · Hecho";color:var(--ok);letter-spacing:.04em}
 @media (prefers-reduced-motion:reduce){.set.done .check{animation:none}}
+/* Inicio v2: saludo compacto, entreno arriba, semana, última mejora y creatina en una fila */
+.hi2{display:flex;flex-direction:column;gap:4px;padding:0 2px}
+.hi2 .today{font-size:13px;color:var(--muted)}
+.hi2 .motto{margin:0;font-size:17px;font-weight:800;line-height:1.3;color:var(--fg)}
+.next.hero{border:1.5px solid rgba(255,138,61,.45);background:linear-gradient(160deg,var(--surface-2),var(--surface))}
+.hero-k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.next.hero .n-day{font-size:30px}
+.wk{background:var(--surface);border-radius:18px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px}
+.wk-dots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700}
+.wd i{width:100%;max-width:34px;aspect-ratio:1;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:14px;font-weight:900;color:#fff}
+.wd.on i{background:var(--accent);border-color:var(--accent)}
+.wd.now{color:var(--fg)}
+.wd.now i{outline:2px solid var(--fg);outline-offset:2px}
+.wk-t{margin:0;font-size:14px;color:var(--muted);text-align:center}
+.wk-t b{color:var(--fg)}
+.best{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:14px 16px;border-left:4px solid var(--ok)}
+.best-i{font-size:28px}
+.best small{display:block;font-size:12px;color:var(--muted)}
+.best b{display:block;font-size:16px}
+.best em{font-style:normal;font-size:14px;color:var(--ok);font-weight:700}
+.checkin.mini{grid-template-columns:30px 1fr auto;padding:11px 14px;gap:12px}
+.checkin.mini .box{width:30px;height:30px;border-radius:9px;font-size:16px}
+.checkin.mini .ci-t{font-size:15px}
+.checkin.mini .ci-r{font-size:13px;color:var(--muted);font-weight:700}
 </style>
 
 </head>
@@ -1268,32 +1293,43 @@ function renderHome(){
       <button class="undo" id="resume-new">No, empezar de cero</button>
     </div>` : "";
 
+  /* Tu semana: días entrenados de lunes a domingo */
+  const mon = new Date(now); mon.setHours(0,0,0,0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+  const wdays = Array.from({length:7}, (_,i) => { const d = new Date(mon); d.setDate(d.getDate() + i); return d; });
+  const trained = new Set(hist.filter(e => !e.imported && e.ts >= mon.getTime()).map(e => dayKey(e.ts)));
+  const nWk = trained.size, goal = cl.days.length;
+  const wkTxt = nWk === 0 ? `Esta semana: 0 de ${goal} entrenos. ¡Hoy es buen día para el primero!`
+    : nWk >= goal ? `Esta semana: <b>${nWk} de ${goal} entrenos</b>. ¡Semana completa! 🏆` : `Esta semana: <b>${nWk} de ${goal} entrenos</b> 💪`;
+  const weekHTML = `<div class="wk"><div class="wk-dots">${wdays.map(d => { const k = dayKey(d), on = trained.has(k);
+      return `<div class="wd${on ? " on" : ""}${k === tk ? " now" : ""}"><i>${on ? "✓" : ""}</i>${d.toLocaleDateString("es-ES",{weekday:"short"}).replace(".","").slice(0,2)}</div>`; }).join("")}</div>
+    <p class="wk-t">${wkTxt}</p></div>`;
+  /* Última mejora: el top set más reciente que subió respecto a la vez anterior */
+  let best = null;
+  [...hist].sort((a,b) => b.ts - a.ts).some(e => { const f = (e.fb || []).find(x => x.cls === "up"); if (f){ best = { f, e }; return true; } return false; });
+  const bestHTML = best ? `<div class="best"><span class="best-i" aria-hidden="true">🔥</span><div><small>Tu última mejora · ${esc(shortDate(best.e.ts))}</small><b>${esc(best.f.name)}</b><em>${esc(best.f.badge)} vs. la vez anterior</em></div></div>` : "";
+
   app.innerHTML = headerHTML("") + `
   <section class="home">
-    <div class="welcome">
-      <div class="today">${esc(today)}</div>
-      <h2>${greet},<br><span>${esc(cl.name)}</span></h2>
+    <div class="hi2">
+      <div class="today">${greet} · ${esc(today)}</div>
       <p class="motto">${esc(mottoOfDay(now))}</p>
-      <p>${took ? "Creatina hecha. Ahora toca darle duro." : "Marca tu creatina y vamos a entrenar."}</p>
     </div>
-
     ${resumeHTML}
-    <div class="blk-title">Check-in de hoy</div>
-    <button class="checkin" id="crea" aria-pressed="${took}">
-      <span class="box" aria-hidden="true">✓</span>
-      <span><span class="ci-t">¿Tomaste la creatina hoy?</span><br><span class="ci-s">${took ? "Registrado. Toca de nuevo si te equivocaste." : "Toca el cuadrito para marcarlo"}</span></span>
-      <span class="ok" aria-hidden="true">OK</span>
-    </button>
-    <div class="week7" aria-label="Creatina últimos 7 días">${week}</div>
-    <div class="streak">${st > 1 ? `Racha: <b>${st} días seguidos</b> 🔥` : st === 1 ? "Racha: <b>1 día</b>. ¡A por el segundo!" : "Empieza tu racha hoy."}</div>
-
-    <div class="blk-title">Tu próximo entreno</div>
-    <div class="next">
+    <div class="next hero">
+      <div class="hero-k">Tu próximo entreno</div>
       <div><div class="n-day">${esc(nd.label)}</div><div class="n-meta">${lastTxt}</div></div>
-      <div class="vibe">${vibe}</div>
       <button class="btn" id="go-train">Empezar entreno</button>
+      <div class="vibe">${vibe}</div>
       ${others.length ? `<div class="alt">¿Hoy te viene mejor otro? ${others.map(x => `<button class="alt-b" data-i="${x.i}">${esc(x.d.label)}</button>`).join("")}</div>` : ""}
     </div>
+    <div class="blk-title">Tu semana</div>
+    ${weekHTML}
+    ${bestHTML}
+    <button class="checkin mini" id="crea" aria-pressed="${took}">
+      <span class="box" aria-hidden="true">✓</span>
+      <span class="ci-t">${took ? "Creatina de hoy hecha" : "¿Tomaste la creatina hoy?"}</span>
+      <span class="ci-r">${st > 0 ? `🔥 ${st} ${st === 1 ? "día" : "días"}` : "Toca para marcar"}</span>
+    </button>
     ${cl.weekly && cl.weekly.length ? `<div class="blk-title">Tus series semanales</div>
     <table class="wk-tab"><thead><tr><th>Grupo muscular</th><th>Series semanales</th></tr></thead>
       <tbody>${cl.weekly.map(([g,n]) => `<tr><td>${esc(g)}</td><td class="num">${esc(String(n))}</td></tr>`).join("")}</tbody></table>
