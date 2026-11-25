@@ -774,10 +774,20 @@ function login(c){
   }
   crea = store.get("cx-crea-" + c) || {};
   mySetup = store.get("cx-setup-" + c) || {};
-  view = "home";
+  /* Si el móvil cerró la app (bloqueo, otra app…), vuelve a la misma pantalla, día y posición durante 6 horas */
+  const pos = store.get("cx-pos-" + c);
+  const fresh = pos && Date.now() - (pos.ts || 0) < 6 * 3600 * 1000;
+  view = fresh && ["home","train","hist"].includes(pos.view) ? pos.view : "home";
+  dayIdx = fresh && CLIENTS[c].days[pos.day] ? pos.day : 0;
   render();
+  if (fresh && pos.y) requestAnimationFrame(() => window.scrollTo(0, pos.y));
 }
-function logout(){ store.del("cx-code"); code = null; renderLogin(); }
+function savePos(){ if (code) store.set("cx-pos-" + code, { view, day: dayIdx, y: Math.round(window.scrollY), ts: Date.now() }); }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") savePos(); });
+window.addEventListener("pagehide", savePos);
+let posT = null;
+window.addEventListener("scroll", () => { clearTimeout(posT); posT = setTimeout(savePos, 300); }, { passive: true });
+function logout(){ if (code) store.del("cx-pos-" + code); store.del("cx-code"); code = null; renderLogin(); }
 function save(){ store.set("cx-log-" + code, log); store.set("cx-logts-" + code, Date.now()); }
 /* Entreno a medias: un día con series marcadas o con kilos/reps apuntados que todavía no se terminó */
 function pendingDay(){
@@ -814,7 +824,7 @@ function confirmRestart(p){
   del.onclick = () => { close(); clearDay(p.day); renderHome(); toast("Listo, ese entreno empieza de cero"); };
 }
 function saveHist(){ store.set("cx-hist-" + code, hist); trackDeleted(); queueSync(); }
-function render(){ view === "hist" ? renderHistory() : view === "train" ? renderSession() : renderHome(); }
+function render(){ view === "hist" ? renderHistory() : view === "train" ? renderSession() : renderHome(); savePos(); }
 
 /* ---------- Historial: utilidades ---------- */
 const parsePrev = p => { const t = String(p).replace(",", "."), m = t.match(/([\d.]+)\s*×\s*(\d+)/); if (m) return {kg:+m[1], reps:+m[2]};
@@ -947,7 +957,7 @@ function renderSession(){
   <div class="finish-bar"><button class="btn" id="finish">Terminar sesión</button></div>`;
 
   wireHeader();
-  app.querySelectorAll(".day").forEach(b => b.onclick = () => { dayIdx = +b.dataset.day; renderSession(); window.scrollTo(0,0); });
+  app.querySelectorAll(".day").forEach(b => b.onclick = () => { dayIdx = +b.dataset.day; renderSession(); window.scrollTo(0,0); savePos(); });
   app.querySelectorAll(".see").forEach(b => b.onclick = () => {
     const p = document.getElementById(b.getAttribute("aria-controls")); p.hidden = !p.hidden;
     if (!p.hidden){ const vp = p.querySelector('[data-pane="v"]'); if (vp && !vp.hidden) loadShort(p); } else unloadShort(p);
