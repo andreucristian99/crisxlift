@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Crisxlift App</title>
 <meta name="description" content="App de entrenamiento para atletas de las asesorías Crisxlift.">
-<meta name="theme-color" content="#0e1330">
+<meta name="theme-color" content="#0a0a0b">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon.png">
@@ -20,9 +20,9 @@
 <style>
 /* Layout: app de móvil a una columna (máx 480px), cabecera fija de sesión, tarjetas por ejercicio con series apiladas. Look único navy de marca. */
 :root{
-  --bg:#0e1330; --surface:#1a2247; --surface-2:#242d5c; --line:rgba(214,222,255,.10);
-  --fg:#eef0f9; --muted:#97a0c6; --accent:#ff8a3d; --accent-ink:#1a2247;
-  --backoff:#8fb0ff; --backoff2:#c3b5ff; --ok:#53d3a6; --warn:#ffb27a;
+  --bg:#0a0a0b; --surface:#161618; --surface-2:#232326; --line:rgba(255,255,255,.08);
+  --fg:#f5f5f5; --muted:#8d8d93; --accent:#ff8a3d; --accent-ink:#0a0a0b;
+  --backoff:#8fb0ff; --backoff2:#c3b5ff; --ok:#4ade80; --warn:#facc15;
   --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
@@ -232,7 +232,7 @@ button{cursor:pointer}
 .checkin .ci-t{font-weight:700;font-size:16px}
 .checkin .ci-s{font-size:13px;color:var(--muted)}
 .checkin .ok{font-family:var(--display);font-weight:900;font-size:24px;color:var(--ok);opacity:0;transform:scale(.6);transition:all .25s}
-.checkin[aria-pressed="true"]{border-color:var(--ok);background:rgba(83,211,166,.08)}
+.checkin[aria-pressed="true"]{border-color:var(--ok);background:rgba(74,222,128,.08)}
 .checkin[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok);color:var(--bg)}
 .checkin[aria-pressed="true"] .ok{opacity:1;transform:none}
 .week7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:-4px}
@@ -279,7 +279,7 @@ button{cursor:pointer}
 .warm-ok{flex:0 0 auto;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
 .warm.cool{margin-top:12px}
 .warm-ok[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--bg)}
-.warm.done{border-style:solid;border-color:rgba(83,211,166,.35)}
+.warm.done{border-style:solid;border-color:rgba(74,222,128,.35)}
 .paper td{white-space:nowrap}
 .paper td.ok{color:#1e8e5e;font-weight:600}
 .paper td.lo{color:#c25a12;font-weight:600}
@@ -343,7 +343,7 @@ button{cursor:pointer}
 .fb-t b{font-size:13.5px;font-weight:700}
 .fb-t small{font-size:12px;color:var(--muted)}
 .fb-b{font-size:12px;font-weight:800;padding:4px 8px;border-radius:7px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;max-width:120px}
-.fb-r.up .fb-i{background:var(--ok);color:var(--bg)} .fb-r.up .fb-b{color:var(--ok);background:rgba(83,211,166,.12)}
+.fb-r.up .fb-i{background:var(--ok);color:var(--bg)} .fb-r.up .fb-b{color:var(--ok);background:rgba(74,222,128,.12)}
 .fb-r.new .fb-i{background:var(--accent);color:var(--accent-ink)} .fb-r.new .fb-b{color:var(--accent)}
 .fb-r.mid .fb-i{background:rgba(255,178,122,.18);color:var(--warn)} .fb-r.mid .fb-b{color:var(--warn)}
 .fb-f{margin:0;font-size:11px;color:var(--muted);text-align:right}
@@ -478,10 +478,10 @@ button{cursor:pointer}
 ::selection{background:rgba(255,138,61,.35);color:var(--fg)}
 input,textarea{caret-color:var(--accent)}
 /* Botones secundarios (+ setup, + aproximación, nota): fondo suave en vez de línea discontinua */
-.setup-add,.add-aprox,.note-b{border:1px solid transparent;background:rgba(214,222,255,.06);color:#b9c0e0;display:inline-flex;align-items:center;gap:6px}
-.setup-add:active,.add-aprox:active,.note-b:active{background:rgba(214,222,255,.12)}
+.setup-add,.add-aprox,.note-b{border:1px solid transparent;background:rgba(255,255,255,.06);color:#b9c0e0;display:inline-flex;align-items:center;gap:6px}
+.setup-add:active,.add-aprox:active,.note-b:active{background:rgba(255,255,255,.12)}
 .note-b svg{width:14px;height:14px;flex:0 0 auto}
-.last{border:1px solid transparent;background:rgba(14,19,48,.75)}
+.last{border:1px solid transparent;background:rgba(10,10,11,.75)}
 .warm,.day-memo{border-style:solid}
 /* Mensaje de ánimo: caja entera tintada */
 .vibe{border:1px solid rgba(255,138,61,.24);background:rgba(255,138,61,.08)}
@@ -490,11 +490,11 @@ input,textarea{caret-color:var(--accent)}
 .progress{height:6px}
 /* Serie hecha: se nota de un vistazo */
 .set{transition:background .25s ease-out}
-.set.done{background:rgba(83,211,166,.10);margin-inline:-16px;padding:12px 16px;border-top-color:rgba(83,211,166,.18)}
+.set.done{background:rgba(74,222,128,.10);margin-inline:-16px;padding:12px 16px;border-top-color:rgba(74,222,128,.18)}
 .set.done .check{animation:pop .35s cubic-bezier(.2,.9,.3,1.4)}
 @keyframes pop{0%{transform:scale(.8)}100%{transform:none}}
 /* Ejercicio completo: borde verde y "Hecho" junto al número */
-.ex:has(.set.done):not(:has(.set:not(.done))){box-shadow:inset 0 0 0 1.5px rgba(83,211,166,.45),0 10px 24px -14px rgba(0,0,0,.6)}
+.ex:has(.set.done):not(:has(.set:not(.done))){box-shadow:inset 0 0 0 1.5px rgba(74,222,128,.45),0 10px 24px -14px rgba(0,0,0,.6)}
 .ex:has(.set.done):not(:has(.set:not(.done))) .ex-idx::after{content:" · Hecho";color:var(--ok);letter-spacing:.04em}
 @media (prefers-reduced-motion:reduce){.set.done .check{animation:none}}
 /* Inicio v2: saludo compacto, entreno arriba, semana, última mejora y creatina en una fila */
