@@ -148,6 +148,19 @@ button{cursor:pointer}
 .v-lab{font-size:12px;color:var(--fg);font-weight:600;align-self:flex-start}
 .warm-t a{color:var(--muted);text-decoration:underline;text-decoration-color:rgba(151,160,198,.4);text-underline-offset:2px}
 .m-photo{width:100%;max-width:320px;border-radius:14px;display:block}
+/* ---------- ¿Qué trabajo? ---------- */
+.m-tabs.three{grid-template-columns:1fr 1.3fr 1fr}
+.mu{width:100%;display:flex;flex-direction:column;gap:10px}
+.mu-figs{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:320px;margin:0 auto;width:100%}
+.mu-fig{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mu-fig svg{width:100%;max-width:150px;height:auto;display:block}
+.mu-fig figcaption{font-size:11px;color:var(--muted)}
+.mu-leg{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:12px;color:var(--muted)}
+.mu-leg span{display:inline-flex;align-items:baseline;gap:6px}
+.mu-dot{display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--accent);flex:0 0 auto}
+.mu-dot.soft{background:#ffc7a1}
+.mu-txt{font-size:13px;line-height:1.45;color:var(--fg);border-top:1px solid var(--line);padding-top:9px}
+.mu-txt b{color:var(--accent);font-weight:600}
 
 /* ---------- Pestañas Entrenar / Historial ---------- */
 .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--surface);border-radius:12px;padding:4px;gap:4px}
@@ -1033,11 +1046,187 @@ function warmHTML(day, kind = "warm"){
 /* Fotos de máquinas de VivaGym: se usan las mismas que en la app CristianEntrenador ("img": "fotos/...") */
 const VIVA_FOTOS = "https://andreucristian99.github.io/cristianentrenador/";
 const photoSrc = ex => ex.img ? (/^https?:/.test(ex.img) ? ex.img : VIVA_FOTOS + ex.img) : (ex.photo && PHOTOS[ex.photo]) || "";
+/* ---------- ¿Qué trabajo? — músculos de cada ejercicio ----------
+   Datos de la planilla "¿Qué trabajo? — músculos por ejercicio" revisada por Cris.
+   p = principal (naranja fuerte), s = ayudan (naranja suave), t = "Deberías sentirlo en…".
+   El nombre del ejercicio se busca por palabras clave, así sirven las variantes (agarre, máquina, zona…). */
+const MUSC = {
+  press_plano:{p:"Pectoral",s:"Tríceps, deltoide anterior",t:"el pecho, sobre todo al bajar y al empezar a empujar."},
+  press_plano_m:{p:"Pectoral",s:"Tríceps, deltoide anterior",t:"el pecho, notando cómo se estira abajo del todo."},
+  press_incl:{p:"Pectoral (parte superior)",s:"Deltoide anterior, tríceps",t:"la parte de arriba del pecho, cerca de la clavícula."},
+  aperturas:{p:"Pectoral",s:"Deltoide anterior",t:"el pecho, al juntar los brazos y al abrirlos despacio."},
+  fondos:{p:"Pectoral (parte inferior), tríceps",s:"Deltoide anterior",t:"la parte baja del pecho y detrás del brazo."},
+  flexiones:{p:"Pectoral",s:"Tríceps, deltoide anterior, abdomen",t:"el pecho, bajando con el cuerpo recto."},
+  jalon:{p:"Dorsal ancho",s:"Bíceps, deltoide posterior, trapecio medio",t:"los costados de la espalda, debajo de las axilas, al llevar los codos hacia abajo."},
+  jalon_uni:{p:"Dorsal ancho",s:"Bíceps, deltoide posterior",t:"el costado de la espalda del brazo que tira, al llevar el codo hacia la cadera."},
+  jalon_sup:{p:"Dorsal ancho, bíceps",s:"Trapecio medio",t:"los costados de la espalda y el bíceps."},
+  dominadas:{p:"Dorsal ancho",s:"Bíceps, trapecio medio, abdomen",t:"los costados de la espalda, al subir llevando los codos hacia abajo."},
+  dominadas_sup:{p:"Dorsal ancho, bíceps",s:"Trapecio medio, abdomen",t:"los costados de la espalda y el bíceps."},
+  remo:{p:"Dorsal ancho, trapecio medio y romboides",s:"Bíceps, deltoide posterior",t:"el centro y los costados de la espalda, al llevar los codos hacia atrás."},
+  remo_t:{p:"Dorsal ancho, trapecio medio y romboides",s:"Bíceps, deltoide posterior, lumbar",t:"el centro de la espalda, entre los omóplatos."},
+  remo_barra:{p:"Dorsal ancho, trapecio medio y romboides",s:"Bíceps, deltoide posterior, lumbar, isquiosurales",t:"el centro de la espalda, entre los omóplatos."},
+  remo_uni:{p:"Dorsal ancho",s:"Trapecio medio, bíceps, deltoide posterior",t:"el costado de la espalda del brazo que tira."},
+  remo_banda:{p:"Dorsal ancho, trapecio medio y romboides",s:"Bíceps, deltoide posterior",t:"el centro de la espalda, al juntar los omóplatos."},
+  militar:{p:"Deltoide anterior",s:"Deltoide lateral, tríceps",t:"la parte delantera del hombro."},
+  vuelos:{p:"Deltoide lateral",s:"Trapecio superior",t:"el costado del hombro, no en el cuello."},
+  vuelos_incl:{p:"Deltoide lateral",s:"Deltoide posterior",t:"el costado del hombro, no en el cuello."},
+  reverse:{p:"Deltoide posterior",s:"Trapecio medio, romboides",t:"la parte de atrás del hombro."},
+  curl:{p:"Bíceps",s:"Braquial, antebrazo",t:"la parte de delante del brazo."},
+  curl_maq:{p:"Bíceps",s:"Braquial",t:"la parte de delante del brazo."},
+  scott:{p:"Bíceps",s:"Braquial",t:"la parte de delante del brazo, sobre todo abajo del recorrido."},
+  scott_rev:{p:"Braquiorradial, braquial",s:"Bíceps",t:"la parte de arriba del antebrazo, cerca del codo."},
+  bayes:{p:"Bíceps",s:"Braquial",t:"el bíceps, estirado al bajar con el brazo por detrás del cuerpo."},
+  curl_incl:{p:"Bíceps",s:"Braquial",t:"el bíceps, estirado al bajar."},
+  martillo:{p:"Braquial, braquiorradial",s:"Bíceps",t:"el costado del brazo y la parte de arriba del antebrazo."},
+  frances:{p:"Tríceps",s:"",t:"la parte de atrás del brazo."},
+  tri_polea:{p:"Tríceps",s:"",t:"la parte de atrás del brazo, al estirar el codo del todo."},
+  tri_uni:{p:"Tríceps",s:"",t:"la parte de atrás del brazo que trabaja."},
+  katana:{p:"Tríceps (cabeza larga)",s:"",t:"la parte de atrás del brazo, estirada por encima de la cabeza."},
+  kazz:{p:"Tríceps",s:"Pectoral, deltoide anterior",t:"la parte de atrás del brazo y algo de pecho."},
+  quad_ext:{p:"Cuádriceps",s:"",t:"la parte de delante del muslo."},
+  quad_uni:{p:"Cuádriceps",s:"",t:"la parte de delante del muslo de la pierna que trabaja."},
+  hack:{p:"Cuádriceps",s:"Glúteo, aductores",t:"la parte de delante del muslo."},
+  sentadilla:{p:"Cuádriceps, glúteo",s:"Aductores",t:"la parte de delante del muslo y el glúteo."},
+  prensa:{p:"Cuádriceps, glúteo",s:"Aductores",t:"la parte de delante del muslo y el glúteo."},
+  goblet:{p:"Cuádriceps, glúteo",s:"Aductores, abdomen",t:"la parte de delante del muslo y el glúteo."},
+  bulgara:{p:"Cuádriceps, glúteo",s:"Aductores",t:"delante del muslo y el glúteo de la pierna de delante."},
+  sissy:{p:"Cuádriceps",s:"",t:"la parte de delante del muslo, bien estirada."},
+  femoral:{p:"Isquiosurales",s:"Gemelos",t:"la parte de atrás del muslo."},
+  nordico:{p:"Isquiosurales",s:"Gemelos, glúteo",t:"la parte de atrás del muslo, frenando la bajada."},
+  rdl:{p:"Isquiosurales, glúteo",s:"Lumbar, espalda alta",t:"la parte de atrás del muslo, estirándose al bajar."},
+  rdl_smith:{p:"Isquiosurales, glúteo",s:"Lumbar",t:"la parte de atrás del muslo, estirándose al bajar."},
+  hip:{p:"Glúteo",s:"Isquiosurales",t:"el glúteo, apretando arriba del todo."},
+  patada:{p:"Glúteo",s:"Isquiosurales",t:"el glúteo de la pierna que empuja."},
+  abductor:{p:"Glúteo medio",s:"Glúteo mayor (parte superior)",t:"la parte de arriba y de fuera del glúteo."},
+  abductor_uni:{p:"Glúteo medio",s:"",t:"la parte de arriba y de fuera del glúteo de la pierna que sube."},
+  puente:{p:"Glúteo",s:"Isquiosurales",t:"el glúteo de la pierna apoyada, apretando arriba."},
+  aductor:{p:"Aductores",s:"",t:"la parte de dentro del muslo."},
+  lumbar:{p:"Lumbar, glúteo, isquiosurales",s:"",t:"la zona baja de la espalda, el glúteo y la parte de atrás del muslo."},
+  gemelos:{p:"Gemelos",s:"",t:"la pantorrilla, estirándola abajo del todo."},
+  crunch:{p:"Abdomen",s:"",t:"el abdomen, al encogerte hacia delante."},
+  piernas:{p:"Abdomen",s:"Flexores de cadera",t:"el abdomen, al enrollar la pelvis hacia arriba (no solo subir las piernas)."},
+  rueda:{p:"Abdomen",s:"Dorsal ancho, hombros",t:"el abdomen entero, sin que se hunda la zona lumbar."},
+  dragon:{p:"Abdomen",s:"Dorsal ancho, glúteo",t:"el abdomen entero, aguantando el cuerpo recto."},
+  plancha:{p:"Abdomen",s:"Hombros, glúteo",t:"el abdomen, aguantando el cuerpo recto."}
+};
+/* Orden importa: lo más concreto primero. null = movilidad/estiramientos (sin "¿Qué trabajo?") */
+const MUSC_RULES = [
+  [/movilidad|estira|dorsiflex|flexion plantar|flexoext|foam|cinta|cardio/, null],
+  [/elevacion de piernas|abdominales en paralelas/, "piernas"], [/ruedita|wheel|rueda/, "rueda"], [/dragon/, "dragon"],
+  [/plancha/, "plancha"], [/crunch/, "crunch"],
+  [/extension lumbar/, "lumbar"], [/gemelos/, "gemelos"],
+  [/kazz/, "kazz"], [/katana/, "katana"], [/press frances/, "frances"],
+  [/press inclinado/, "press_incl"], [/press plano con mancuernas/, "press_plano_m"], [/press plano|press banca|press de pecho/, "press_plano"],
+  [/press militar/, "militar"],
+  [/triceps.*unilateral|unilateral.*triceps/, "tri_uni"], [/triceps/, "tri_polea"],
+  [/cuadriceps.*unilateral/, "quad_uni"], [/extension de cuadriceps/, "quad_ext"],
+  [/sissy/, "sissy"], [/bulgara/, "bulgara"], [/goblet/, "goblet"], [/hack/, "hack"], [/pendulum/, "hack"],
+  [/prensa/, "prensa"], [/sentadilla/, "sentadilla"],
+  [/nordico/, "nordico"], [/curl femoral/, "femoral"], [/(rdl|rumano) en smith/, "rdl_smith"], [/rdl|rumano/, "rdl"],
+  [/hip thrust/, "hip"], [/patada/, "patada"], [/abductor.*(unilateral|mancuerna)/, "abductor_uni"], [/abductor/, "abductor"],
+  [/puente/, "puente"], [/aductor/, "aductor"],
+  [/fondos/, "fondos"], [/flexion/, "flexiones"], [/peck|pec deck|aperturas|cruce de poleas/, "aperturas"],
+  [/reverse|posterior/, "reverse"],
+  [/(vuelos|elevaciones) laterales.*inclinado/, "vuelos_incl"], [/(vuelos|elevaciones) laterales/, "vuelos"],
+  [/scott al reves/, "scott_rev"], [/scott/, "scott"], [/bayesian/, "bayes"], [/martillo/, "martillo"],
+  [/curl.*inclinado/, "curl_incl"], [/curl de biceps en maquina/, "curl_maq"], [/curl/, "curl"],
+  [/dominadas supinas/, "dominadas_sup"], [/jalon.*supino/, "jalon_sup"], [/dominada/, "dominadas"],
+  [/jalon.*unilateral|jalon unilateral/, "jalon_uni"], [/jalon/, "jalon"],
+  [/remo en t/, "remo_t"], [/remo con barra/, "remo_barra"], [/remo con banda/, "remo_banda"],
+  [/dorian|remo unilateral|traccion.*unilateral/, "remo_uni"], [/remo/, "remo"]
+];
+const muscNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+function musclesOf(ex){
+  if (!ex || ex.check) return null;
+  if (ex.musc) return ex.musc;            /* por si Cris quiere uno a mano en la rutina: {p, s, t} */
+  const n = muscNorm(ex.name);
+  for (const [re, id] of MUSC_RULES) if (re.test(n)) return id ? MUSC[id] : null;
+  return null;
+}
+/* Zonas de la silueta: cada músculo de la planilla se pinta en su sitio */
+function muscZones(txt){
+  const t = muscNorm(txt), z = new Set();
+  const has = re => re.test(t);
+  if (has(/pectoral \(parte superior\)/)) z.add("pec_s");
+  else if (has(/pectoral \(parte inferior\)/)) z.add("pec_i");
+  else if (has(/pectoral/)) { z.add("pec_s"); z.add("pec_i"); }
+  if (has(/deltoide anterior|hombros/)) z.add("del_a");
+  if (has(/deltoide lateral|hombros/)) z.add("del_l");
+  if (has(/deltoide posterior/)) z.add("del_p");
+  if (has(/triceps/)) z.add("tri");
+  if (has(/biceps|braquial(?!r)/)) z.add("bi");
+  if (has(/braquiorradial|antebrazo/)) z.add("ante");
+  if (has(/dorsal/)) z.add("dor");
+  if (has(/trapecio medio|romboides|espalda alta/)) z.add("trap_m");
+  if (has(/trapecio superior/)) z.add("trap_s");
+  if (has(/lumbar/)) z.add("lum");
+  if (has(/abdomen/)) z.add("abs");
+  if (has(/flexores de cadera/)) z.add("hipf");
+  if (has(/gluteo medio|gluteo mayor \(parte superior\)/)) z.add("glu_m");
+  if (has(/gluteo(?! medio| mayor \(parte superior\))/)) z.add("glu");
+  if (has(/cuadriceps/)) z.add("quad");
+  if (has(/aductores/)) z.add("add");
+  if (has(/isquiosurales/)) z.add("ham");
+  if (has(/gemelos/)) z.add("calf");
+  return z;
+}
+/* Media silueta (lado izquierdo, x de 0 a 100); se refleja para el otro lado */
+const BODY_HALF = `<path d="M100 6c-8 0-13 7-13 16s5 17 13 17z"/><path d="M93 38h7v10h-7z"/>
+<path d="M100 46c-12 0-24 1-34 6-6 3-9 9-10 16l-6 42-5 34c-1 6 0 10 3 11s5-2 6-7l7-36 6-30 2 20-2 36 2 22-4 40 3 44 3 10h9l1-12 3-40 3-28 5-24h1z"/>`;
+const ZONES_FRONT = {
+  trap_s:`<path d="M92 47l-18 6 18 1z"/>`,
+  del_l:`<path d="M66 53c-7 2-10 8-11 15l7 3 4-14z"/>`,
+  del_a:`<path d="M68 53c-3 4-4 10-4 17l8-2 1-13z"/>`,
+  pec_s:`<path d="M74 56c8-2 17-2 25-1v12l-26-1z"/>`,
+  pec_i:`<path d="M73 67l26 1v13c-9 3-19 2-25-5z"/>`,
+  bi:`<path d="M56 72c-3 9-5 18-5 27l7 2 4-26z"/>`,
+  ante:`<path d="M50 106c-3 10-5 20-6 32l5 1 6-32z"/>`,
+  abs:`<path d="M87 86h12v52h-10c-2-17-2-35-2-52z"/>`,
+  hipf:`<path d="M80 136l9 4-2 12-8-6z"/>`,
+  quad:`<path d="M76 150c-4 16-5 34-3 50h14l4-26 3-22c-6-1-12-1-18-2z"/>`,
+  add:`<path d="M95 154l4 1-1 30-5 4z"/>`,
+  calf:`<path d="M76 212c-2 10-2 22 0 32h5l2-32z"/>`
+};
+const ZONES_BACK = {
+  trap_s:`<path d="M92 47l-18 6 18 1z"/>`,
+  trap_m:`<path d="M99 54l-16 3 10 18 6 18z"/>`,
+  del_l:`<path d="M66 53c-7 2-10 8-11 15l7 3 4-14z"/>`,
+  del_p:`<path d="M68 53c-3 4-4 10-4 17l8-2 1-13z"/>`,
+  tri:`<path d="M56 72c-3 9-5 18-5 27l7 2 4-26z"/>`,
+  ante:`<path d="M50 106c-3 10-5 20-6 32l5 1 6-32z"/>`,
+  dor:`<path d="M74 70c5 0 12 4 18 10l5 30c-9-4-17-12-22-22z"/>`,
+  lum:`<path d="M91 112h8v26h-9z"/>`,
+  glu_m:`<path d="M78 140c5-2 12-2 18-1l-1 7-17 1z"/>`,
+  glu:`<path d="M76 148c7-1 15-1 23 0l-1 18c-9 2-17 0-22-4z"/>`,
+  ham:`<path d="M75 170c6 2 14 2 20 0l-3 28-4 6h-12c-2-11-2-23-1-34z"/>`,
+  calf:`<path d="M75 212c-3 10-3 20-1 30h7l2-30z"/>`
+};
+function muscFigure(zones, prim, sec, label){
+  const part = (z) => {
+    let s = `<g fill="#2a2a2e">${BODY_HALF}</g>`;
+    for (const k in z){
+      const c = prim.has(k) ? "var(--accent)" : sec.has(k) ? "#ffc7a1" : "#3a3a3f";
+      s += `<g fill="${c}">${z[k]}</g>`;
+    }
+    return s;
+  };
+  return `<figure class="mu-fig"><svg viewBox="0 0 200 262" aria-hidden="true">${part(zones)}<g transform="translate(200 0) scale(-1 1)">${part(zones)}</g></svg><figcaption>${label}</figcaption></figure>`;
+}
+function muscleHTML(m){
+  const PZ = muscZones(m.p), SZ = muscZones(m.s || "");
+  PZ.forEach(k => SZ.delete(k));
+  return `<div class="mu">
+    <div class="mu-figs">${muscFigure(ZONES_FRONT, PZ, SZ, "Frente")}${muscFigure(ZONES_BACK, PZ, SZ, "Espalda")}</div>
+    <div class="mu-leg"><span><i class="mu-dot"></i>Principal: ${esc(m.p.toLowerCase())}</span>${m.s ? `<span><i class="mu-dot soft"></i>Ayudan: ${esc(m.s.toLowerCase())}</span>` : ""}</div>
+    <div class="mu-txt"><b>Deberías sentirlo en:</b> ${esc(m.t)}</div>
+  </div>`;
+}
 function mediaHTML(ex, id){
-  const hasP = !!photoSrc(ex), hasV = !!(ex.video || ex.loom);
+  const hasP = !!photoSrc(ex), hasV = !!(ex.video || ex.loom), mu = musclesOf(ex);
   const ref = ex.ref ? `<a class="yt-link" href="${esc(ex.ref.url)}" target="_blank" rel="noopener">📎 ${esc(ex.ref.label)} ↗</a>` : "";
-  if (!hasP && !hasV) return ref ? `<div class="media">${ref}</div>` : `<div class="vid">Aquí irá tu foto y vídeo del ejercicio</div>`;
-  const first = hasV ? "v" : "p";
+  if (!hasP && !hasV && !mu) return ref ? `<div class="media">${ref}</div>` : `<div class="vid">Aquí irá tu foto y vídeo del ejercicio</div>`;
+  const first0 = hasV ? "v" : "p";
+  const first = hasP || hasV ? first0 : "m";
   let vSrc = "", vOpen = "", wide = !!(ex.wide || ex.loom);
   if (ex.loom){ vSrc = `https://www.loom.com/embed/${encodeURIComponent(ex.loom)}?hide_owner=true&hideEmbedTopBar=true`; vOpen = `https://www.loom.com/share/${encodeURIComponent(ex.loom)}`; }
   else if (ex.video){
@@ -1047,10 +1236,11 @@ function mediaHTML(ex, id){
     vOpen = ex.wide ? `https://www.youtube.com/watch?v=${v}${ex.start ? "&t=" + ex.start + "s" : ""}` : `https://www.youtube.com/shorts/${v}`;
   }
   return `<div class="media" data-id="${id}">
-    ${hasP && hasV ? `<div class="m-tabs"><button class="m-tab" data-m="v" aria-pressed="${first==="v"}">▶ Vídeo</button><button class="m-tab" data-m="p" aria-pressed="${first==="p"}">📷 Máquina</button></div>` : ""}
+    ${[hasV, mu, hasP].filter(Boolean).length > 1 ? `<div class="m-tabs${[hasV, mu, hasP].filter(Boolean).length > 2 ? " three" : ""}">${hasV ? `<button class="m-tab" data-m="v" aria-pressed="${first==="v"}">▶ Vídeo</button>` : ""}${mu ? `<button class="m-tab" data-m="m" aria-pressed="${first==="m"}">¿Qué trabajo?</button>` : ""}${hasP ? `<button class="m-tab" data-m="p" aria-pressed="${first==="p"}">📷 Máquina</button>` : ""}</div>` : ""}
     ${hasV ? `<div class="m-pane" data-pane="v"${first==="v"?"":" hidden"}>${ex.vlabel ? `<div class="v-lab">${esc(ex.vlabel)}</div>` : ""}<div class="short${wide ? " wide" : ""}" data-src="${esc(vSrc)}"></div>
       <a class="yt-link" href="${esc(vOpen)}" target="_blank" rel="noopener">¿No carga? Ábrelo ${ex.loom ? "en Loom" : "en YouTube"} ↗</a>${ref}</div>` : ""}
     ${hasP ? `<div class="m-pane" data-pane="p"${first==="p"?"":" hidden"}><img class="m-photo" src="${esc(photoSrc(ex))}" alt="Máquina de ${esc(ex.name)}" loading="lazy"></div>` : ""}
+    ${mu ? `<div class="m-pane" data-pane="m"${first==="m"?"":" hidden"}>${muscleHTML(mu)}</div>` : ""}
   </div>`;
 }
 /* El vídeo solo se carga cuando se abre "Ver ejercicio" (ahorra datos) */
@@ -1116,7 +1306,7 @@ function setupPdf(day, ex, ei){
 }
 
 /* Sin vídeo, foto, enlace ni indicaciones no hay nada que enseñar: se oculta "Ver ejercicio" */
-const hasInfo = ex => !!(ex.video || ex.loom || photoSrc(ex) || ex.ref || (ex.cues && ex.cues.length));
+const hasInfo = ex => !!(ex.video || ex.loom || photoSrc(ex) || ex.ref || (ex.cues && ex.cues.length) || musclesOf(ex));
 /* ¿Hay que grabarse? "rec": "top" (solo top set, verde) o "topbo" (top set y back-off, naranja) */
 const recOf = ex => ex && (ex.rec === "top" || ex.rec === "topbo") ? ex.rec : "";
 const recChip = ex => { const r = recOf(ex); return r ? `<div class="rec ${r}">🎥 ${r === "top" ? "Grábate el top set" : "Grábate el top set y el back-off"}</div>` : ""; };
