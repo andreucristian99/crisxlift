@@ -122,6 +122,11 @@ h1,h2,h3{margin:0}
 .savebtn{border:0;border-radius:12px;background:var(--accent);color:#1a1205;font-weight:800;padding:9px 16px}
 .savebtn:disabled{background:var(--surface-2);color:var(--muted)}
 .ed-head{margin-bottom:8px}
+.days-bar{display:flex;flex-direction:column;gap:8px;background:var(--surface);border-radius:16px;padding:12px;margin:4px 0 4px}
+.days-bar span{font-size:13px;color:var(--muted)}
+.days-bar a{color:var(--fg);font-weight:600;text-decoration:none}
+.btn.sm{padding:11px;font-size:15px}
+.day{scroll-margin-top:70px}
 .day{background:var(--surface);border-radius:18px;padding:12px;margin-top:12px}
 .day-h{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .day-l{flex:1;min-width:0;font:800 17px var(--display);color:var(--fg);background:none;border:0;border-bottom:1px dashed var(--line);padding:6px 2px;text-transform:uppercase}
@@ -582,7 +587,9 @@ function renderEditor(){
       ${ed.app === "CristianEntrenador" ? `<label class="tg"><input type="checkbox" id="edc" ${c.creatina ? "checked" : ""}> Check-in de creatina en el inicio</label>` : ""}
       <p class="note">${esc(ed.app)} · ${ed.code ? `código ${esc(ed.code)}` : "el código se crea al guardar"}</p>
     </div>
-    ${c.days.map((d, di) => `<section class="day">
+    <div class="days-bar"><span>${c.days.length} ${c.days.length === 1 ? "sesión" : "sesiones"}: ${c.days.map((d, di) => `<a href="#day-${di}">${esc(d.label.split("·").pop().trim() || d.label)}</a>`).join(" · ")}</span>
+      <button class="btn sm" data-newday>＋ Añadir nueva sesión</button></div>
+    ${c.days.map((d, di) => `<section class="day" id="day-${di}">
       <div class="day-h"><input class="day-l" data-d="${di}" value="${esc(d.label)}" aria-label="Nombre del día"><button class="icon-b" data-dm="${di}" aria-label="Opciones del día">⋯</button></div>
       ${d.home ? `<p class="note" style="margin:0 0 6px">🏠 Día en casa</p>` : ""}
       <div class="exl">${d.exercises.map((ex, ei) => `<div class="exr">
@@ -594,7 +601,7 @@ function renderEditor(){
       ${(d.warm || []).length || (d.cool || []).length ? `<p class="note">${(d.warm || []).length ? `Calentamiento: ${d.warm.map(w => esc(w.n)).join(", ")}` : ""}${(d.warm || []).length && (d.cool || []).length ? "<br>" : ""}${(d.cool || []).length ? `${esc(d.coolTitle || "Para terminar")}: ${d.cool.map(w => esc(w.n)).join(", ")}` : ""}</p>` : ""}
       <button class="add" data-add="${di}">＋ Añadir ejercicio</button>
     </section>`).join("")}
-    <button class="ghost" id="addday" style="margin-top:12px">＋ Añadir día</button>
+    <button class="ghost" data-newday style="margin-top:12px">＋ Añadir nueva sesión (día)</button>
     <div style="height:30px"></div>`;
 
   $("edx").onclick = () => { if (ed.dirty && !confirm(ed.isNew ? "¿Descartar este cliente nuevo?" : "Tienes cambios sin guardar. ¿Salir igualmente?")) return; ed = null; render(); };
@@ -614,10 +621,28 @@ function renderEditor(){
     openPicker(it => { const ex = it ? fromLib(it, ctxEd()) : null; if (!ex) return; ex._t = 1; c.days[di].exercises.push(ex); dirty(); const y = scrollY; renderEditor(); scrollTo(0, y); openExercise(di, c.days[di].exercises.length - 1); });
   });
   app.querySelectorAll("[data-dm]").forEach(b => b.onclick = () => dayMenu(+b.dataset.dm));
-  $("addday").onclick = () => {
+  app.querySelectorAll("[data-newday]").forEach(b => b.onclick = () => newDay());
+}
+/* Nueva sesión: se le pone nombre, se crea vacía y se abre la biblioteca para su primer ejercicio */
+function newDay(){
+  const c = ed.client, n = c.days.length + 1;
+  const sh = sheet(`<div class="sh-h"><div><h3>Nueva sesión</h3><p>Será el día ${n} de ${esc(ed.name)}</p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <label class="fl"><span>Nombre de la sesión</span><input id="ndl" autocomplete="off" placeholder="Ej.: Upper A"></label>
+    <div class="qk" style="flex-wrap:wrap">${["Upper A", "Upper B", "Legday A", "Legday B", "Full body", "Push", "Pull"].map(t => `<button class="mini" data-t="${t}">${t}</button>`).join("")}</div>
+    <button class="btn" id="ndok" style="margin-top:12px">Crear y añadir ejercicios</button>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  const inp = $("ndl"); inp.focus();
+  sh.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { inp.value = b.dataset.t; });
+  const go = () => {
+    const name = inp.value.trim();
     let id; do { id = "D" + Math.random().toString(36).slice(2, 6).toUpperCase(); } while (c.days.some(d => d.id === id));
-    c.days.push({ id, label: `Día ${c.days.length + 1}`, exercises: [] }); dirty(); renderEditor(); scrollTo(0, document.body.scrollHeight);
+    c.days.push({ id, label: name ? `Día ${n} · ${name}` : `Día ${n}`, exercises: [] });
+    sh.close(); dirty(); renderEditor();
+    const di = c.days.length - 1, el = $("day-" + di); if (el) el.scrollIntoView({ block: "start" });
+    app.querySelector(`[data-add="${di}"]`).click();
   };
+  $("ndok").onclick = go;
+  inp.onkeydown = e => { if (e.key === "Enter") go(); };
 }
 const ctxEd = () => ({ gym: ed.client.gym || defGym(ed.app), app: ed.app, name: ed.name });
 
