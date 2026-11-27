@@ -25,8 +25,8 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .brand{font-family:var(--display);font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:.02em}
 .brand span{color:var(--accent)}
 .icon-b{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin-top:12px}
-.seg button{border:0;background:none;border-radius:10px;padding:10px 6px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr .8fr;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin-top:12px}
+.seg button{border:0;background:none;border-radius:10px;padding:10px 4px;font-weight:700;font-size:12.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#1a1205}
 .upd{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
 h1,h2,h3{margin:0}
@@ -163,6 +163,30 @@ h1,h2,h3{margin:0}
 .ov li span small{color:var(--muted)}
 .ov li > small{display:block;color:var(--muted);font-size:12.5px}
 .code{font:900 40px var(--display);letter-spacing:.08em;text-align:center;color:var(--accent);margin:10px 0 16px}
+/* Cobros */
+.sum4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}
+.sum4 button,.sum4 div{background:var(--surface);border:1.5px solid transparent;border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.sum4 button[aria-pressed="true"]{border-color:var(--accent)}
+.sum4 b{font-family:var(--display);font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.sum4 small{font-size:12px;color:var(--muted)}
+.sum4 .hot b{color:var(--accent)} .sum4 .r b{color:var(--bad)} .sum4 .a b{color:var(--warn)}
+.sum4 .money{background:var(--accent);color:#1a1205} .sum4 .money small{color:#1a1205;opacity:.75}
+.cb{background:var(--surface);border-radius:16px;padding:13px 14px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;border-left:4px solid var(--sev,var(--surface-2))}
+.cb.s-bad{--sev:var(--bad)} .cb.s-warn{--sev:var(--accent)} .cb.s-pend{--sev:var(--warn)} .cb.s-ok{--sev:var(--ok)} .cb.s-off{opacity:.6}
+.cb-n{font-weight:700;font-size:16px}
+.cb-m{font-size:13px;color:var(--muted)}
+.cb-m b{color:var(--fg);font-weight:600}
+.cb-a{text-align:right;font-weight:800;font-size:17px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cb-a small{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.cb-x{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.cb-x button{border:0;border-radius:10px;padding:9px 12px;font-weight:700;font-size:14px;background:var(--surface-2)}
+.cb-x .pri{background:var(--accent);color:#1a1205}
+.cb-x .lt{background:var(--fg);color:#111}
+.hist{display:flex;flex-direction:column}
+.hist div{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;border-bottom:1px solid var(--line);padding:7px 0;font-variant-numeric:tabular-nums}
+.pl{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface);border-radius:12px;padding:4px}
+.pl button{border:0;background:none;border-radius:9px;padding:9px;font-weight:700;color:var(--muted)}
+.pl button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--fg);color:#111;font-weight:700;padding:11px 16px;border-radius:12px;z-index:50;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -192,6 +216,7 @@ const dShort = ts => new Date(ts).toLocaleDateString("es-ES", { weekday: "short"
 const hhmm = ts => new Date(ts).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 
 let key = store.get("cp-key"), appId = store.get("cp-app") || "CristianEntrenador";
+let view = store.get("cp-view") === "cobros" ? "cobros" : "apps";   /* "apps" = actividad de clientes · "cobros" = cobros y renovaciones */
 let cq = "";
 let data = null, filter = "all", sel = null, ctab = "ses", openEx = null, loading = false;
 
@@ -220,7 +245,7 @@ function renderLogin(msg){
     go.disabled = true; go.textContent = "Comprobando…";
     try {
       const r = await api({ action: "panel", key: v, app: appId });
-      if (r && r.ok){ key = v; store.set("cp-key", v); setData(r); render(); }
+      if (r && r.ok){ key = v; store.set("cp-key", v); setData(r); if (view === "cobros") loadCobros(false); else render(); }
       else renderLogin(r && r.error === "clave" ? "Esa clave no es correcta." : "No se pudo entrar. Revisa que la hoja tenga la parte del panel.");
     } catch(e){ renderLogin("Sin conexión. Prueba de nuevo."); }
   };
@@ -242,6 +267,7 @@ async function load(force){
 }
 function paintUpd(fail){
   const u = document.getElementById("upd"); if (!u) return;
+  if (view === "cobros") return paintUpdCobros(fail);
   u.textContent = loading ? "Actualizando…" : fail ? "Sin conexión: mostrando lo último guardado" : data ? `Actualizado ${agoTxt(daysAgo(data.at))} a las ${hhmm(data.at)}` : "";
 }
 
@@ -270,12 +296,9 @@ function clientRows(){
 function render(){
   if (!key) return renderLogin();
   if (ed) return renderEditor();
+  if (view === "cobros") return renderCobros();
   if (sel) return renderClient();
-  const head = `<header class="top">
-    <div class="top-row"><div class="brand">Panel <span>Cris</span></div><button class="icon-b" id="ref">↻ Actualizar</button></div>
-    <div class="seg" role="group" aria-label="App">${APPS.map(a => `<button data-a="${a.id}" aria-pressed="${a.id === appId}">${a.label}</button>`).join("")}</div>
-    <div class="upd" id="upd"></div>
-  </header>`;
+  const head = topHTML();
   if (!data){ app.innerHTML = head + `<div class="load">Cargando clientes…</div>`; wireTop(); paintUpd(); return; }
   const rows = clientRows();
   const n = { g: rows.filter(r => r.wk > 0).length, r: rows.filter(r => r.st === "r").length, n: rows.filter(r => r.st === "n").length };
@@ -313,11 +336,24 @@ function render(){
   bus.oninput = filtra; if (cq) filtra();
   app.querySelectorAll(".ci").forEach(b => b.onclick = () => { sel = b.dataset.c; ctab = "ses"; openEx = null; render(); window.scrollTo(0,0); });
 }
+function topHTML(){
+  return `<header class="top">
+    <div class="top-row"><div class="brand">Panel <span>Cris</span></div><button class="icon-b" id="ref">↻ Actualizar</button></div>
+    <div class="seg" role="group" aria-label="Sección">${APPS.map(a => `<button data-a="${a.id}" aria-pressed="${view === "apps" && a.id === appId}">${a.label}</button>`).join("")}<button data-a="cobros" aria-pressed="${view === "cobros"}">💶 Cobros</button></div>
+    <div class="upd" id="upd"></div>
+  </header>`;
+}
 function wireTop(){
-  const ref = document.getElementById("ref"); if (ref) ref.onclick = () => load(true);
+  const ref = document.getElementById("ref"); if (ref) ref.onclick = () => view === "cobros" ? loadCobros(true) : load(true);
   app.querySelectorAll(".seg button").forEach(b => b.onclick = () => {
-    if (b.dataset.a === appId) return;
-    appId = b.dataset.a; store.set("cp-app", appId); filter = "all"; sel = null; load(false);
+    if (b.dataset.a === "cobros"){
+      if (view === "cobros") return;
+      view = "cobros"; store.set("cp-view", view); sel = null; loadCobros(false); return;
+    }
+    if (view === "apps" && b.dataset.a === appId) return;
+    const was = view; view = "apps"; store.set("cp-view", view);
+    if (was === "apps" || b.dataset.a !== appId){ appId = b.dataset.a; store.set("cp-app", appId); filter = "all"; sel = null; load(false); }
+    else { sel = null; data ? render() : load(false); }
   });
 }
 
@@ -853,7 +889,179 @@ async function saveEd(){
       : r && r.msg ? "No se pudo guardar: " + r.msg : "No se pudo guardar. Revisa la conexión y prueba de nuevo.");
 }
 
-if (key) load(false); else renderLogin();
+
+/* =====================================================================
+   COBROS Y RENOVACIONES (antes la app «Cobros Crisxlift»)
+   Los clientes que pagan viven en la pestaña «Cobros» de la hoja.
+   La app calcula sola cuándo vence cada periodo (mensual = 1 mes, trimestral = 3).
+   ===================================================================== */
+const PLANS = { trimestral: { label: "Trimestral", months: 3 }, mensual: { label: "Mensual", months: 1 } };
+let cob = store.get("cp-cobros"), cobLoading = false, cobFilter = "todos", cobQ = "";
+const pad2 = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const todayStr = () => ymd(new Date());
+const parseD = s => { const [y, m, d] = String(s).split("-").map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const addMonths = (s, k) => { const d = parseD(s), day = d.getDate(), t = new Date(d.getFullYear(), d.getMonth() + k, 1); t.setDate(Math.min(day, new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate())); return ymd(t); };
+const dBetween = (a, b) => Math.round((parseD(b) - parseD(a)) / 864e5);
+const fDate = s => parseD(s).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }).replace(".", "");
+const money = n => (Number(n) || 0).toLocaleString("es-ES", { maximumFractionDigits: 2 }) + " €";
+
+function cobStatus(c){
+  const venc = addMonths(c.inicio, (PLANS[c.plan] || PLANS.trimestral).months), left = dBetween(todayStr(), venc);
+  const sev = c.archivado ? "off" : left < 0 ? "bad" : left <= 7 ? "warn" : !c.pagado ? "pend" : "ok";
+  return { venc, left, sev };
+}
+async function loadCobros(){
+  render();                                   /* muestra lo último guardado mientras actualiza */
+  cobLoading = true; paintUpd();
+  try {
+    const r = await api({ action: "panelCobros", key });
+    if (r && r.ok){ cob = r; store.set("cp-cobros", r); cobLoading = false; render(); return; }
+    if (r && r.error === "clave"){ store.del("cp-key"); key = null; renderLogin("La clave cambió. Ponla de nuevo."); return; }
+  } catch(e){}
+  cobLoading = false; paintUpd(true);
+}
+function paintUpdCobros(fail){
+  const u = document.getElementById("upd"); if (!u) return;
+  u.textContent = cobLoading ? "Actualizando…" : fail ? "Sin conexión: mostrando lo último guardado" : cob ? `Actualizado ${agoTxt(daysAgo(cob.at))} a las ${hhmm(cob.at)}` : "";
+}
+/* Guarda en la hoja y refresca la lista con lo que devuelve */
+async function cobSend(body, okMsg){
+  try {
+    const r = await api({ ...body, key });
+    if (r && r.ok){ cob = r; store.set("cp-cobros", r); if (okMsg) toast(okMsg); render(); return true; }
+    if (r && r.error === "clave"){ store.del("cp-key"); key = null; renderLogin("La clave cambió. Ponla de nuevo."); return false; }
+    toast(r && r.msg ? "No se pudo guardar: " + r.msg : "No se pudo guardar. Prueba otra vez.");
+  } catch(e){ toast("Sin conexión. Prueba otra vez."); }
+  return false;
+}
+const cobSave = (c, msg) => cobSend({ action: "panelCobroSave", cliente: c }, msg);
+
+function renderCobros(){
+  const head = topHTML();
+  if (!cob){ app.innerHTML = head + `<div class="load">Cargando cobros…</div>`; wireTop(); paintUpd(); return; }
+  const cl = cob.clientes || [], act = cl.filter(c => !c.archivado), st = new Map(cl.map(c => [c.id, cobStatus(c)]));
+  const mes = todayStr().slice(0, 7);
+  let cobrado = 0; cl.forEach(c => (c.pagos || []).forEach(p => { if (String(p.fecha).slice(0, 7) === mes) cobrado += Number(p.importe) || 0; }));
+  const k = {
+    todos: act.length, pronto: act.filter(c => { const l = st.get(c.id).left; return l >= 0 && l <= 7; }).length,
+    vencidos: act.filter(c => st.get(c.id).left < 0).length, pendientes: act.filter(c => !c.pagado).length, bajas: cl.filter(c => c.archivado).length
+  };
+  let rows = cl.filter(c => {
+    const s = st.get(c.id);
+    if (cobFilter === "bajas") return c.archivado;
+    if (c.archivado) return false;
+    if (cobFilter === "pronto") return s.left >= 0 && s.left <= 7;
+    if (cobFilter === "vencidos") return s.left < 0;
+    if (cobFilter === "pendientes") return !c.pagado;
+    return true;
+  });
+  const q = norm(cobQ.trim()); if (q) rows = rows.filter(c => norm(c.nombre).includes(q));
+  rows.sort((a, b) => st.get(a.id).venc.localeCompare(st.get(b.id).venc) || a.nombre.localeCompare(b.nombre));
+  const tile = (f, cls, val, txt) => `<button class="${cls}" data-cf="${f}" aria-pressed="${cobFilter === f}"><b>${val}</b><small>${txt}</small></button>`;
+  const chips = [["todos", "Todos"], ["pronto", "Vencen pronto"], ["vencidos", "Vencidos"], ["pendientes", "Pendientes"], ["bajas", "Bajas"]];
+  app.innerHTML = head + `
+    <div class="sum4">
+      ${tile("pronto", "hot", k.pronto, "vencen en 7 días")}
+      ${tile("vencidos", "r", k.vencidos, "vencidos")}
+      ${tile("pendientes", "a", k.pendientes, "pagos pendientes")}
+      <div class="money"><b>${money(cobrado)}</b><small>cobrado en ${new Date().toLocaleDateString("es-ES", { month: "long" })}</small></div>
+    </div>
+    <div class="chips">${chips.map(([id, l]) => `<button class="chip" data-cf="${id}" aria-pressed="${cobFilter === id}">${l} · ${k[id]}</button>`).join("")}</div>
+    <input id="cbq" class="inp" type="search" placeholder="🔍 Buscar cliente…" autocomplete="off" value="${esc(cobQ)}" style="margin:6px 0 8px">
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px"><button class="ghost" id="cbnew">＋ Cliente que paga</button><button class="icon-b" id="cbpr">Precios</button></div>
+    <div class="cl">${rows.map(c => { const s = st.get(c.id), pl = (PLANS[c.plan] || PLANS.trimestral).label;
+      const pill = c.archivado ? `<span class="tag">De baja</span>` : s.left < 0 ? `<span class="tag r">Vencido hace ${-s.left} ${-s.left === 1 ? "día" : "días"}</span>` : s.left === 0 ? `<span class="tag a">Vence hoy</span>` : s.left <= 7 ? `<span class="tag a">Vence en ${s.left} ${s.left === 1 ? "día" : "días"}</span>` : `<span class="tag g">Al día</span>`;
+      const pay = c.archivado ? "" : c.pagado ? `<span class="tag g">Pagado</span>` : `<span class="tag a">Pago pendiente</span>`;
+      let x = "";
+      if (!c.archivado){
+        if (!c.pagado) x += `<button class="pri" data-ca="pagar" data-id="${esc(c.id)}">Marcar pagado · ${money(c.precio)}</button>`;
+        if (c.pagado && s.left <= 7) x += `<button class="lt" data-ca="renovar" data-id="${esc(c.id)}">Renovar periodo</button>`;
+      } else x += `<button data-ca="reactivar" data-id="${esc(c.id)}">Reactivar</button>`;
+      x += `<button data-ca="editar" data-id="${esc(c.id)}">Editar</button>`;
+      return `<article class="cb s-${s.sev}">
+        <div><div class="cb-n">${esc(c.nombre)}</div><div class="cb-m">${pl} · ${fDate(c.inicio)} → <b>${fDate(s.venc)}</b></div><div style="margin-top:6px">${pill.replace('class="tag', 'style="margin-left:0" class="tag')}${pay}</div>${c.notas ? `<div class="cb-m" style="margin-top:4px">📝 ${esc(c.notas)}</div>` : ""}</div>
+        <div class="cb-a">${money(c.precio)}<small>${c.plan === "mensual" ? "al mes" : "cada 3 meses"}</small></div>
+        <div class="cb-x">${x}</div>
+      </article>`; }).join("") || `<div class="empty">${cl.length ? "Nadie en este filtro 🙌" : "Aún no hay clientes. Pulsa «＋ Cliente que paga»."}</div>`}</div>`;
+  wireTop(); paintUpd();
+  app.querySelectorAll("[data-cf]").forEach(b => b.onclick = () => { cobFilter = cobFilter === b.dataset.cf && b.dataset.cf !== "todos" ? "todos" : b.dataset.cf; render(); });
+  const bq = $("cbq"); bq.oninput = () => { cobQ = bq.value; const pos = bq.selectionStart; render(); const n = $("cbq"); n.focus(); n.setSelectionRange(pos, pos); };
+  $("cbnew").onclick = () => cobroForm(null);
+  $("cbpr").onclick = preciosForm;
+  app.querySelectorAll("[data-ca]").forEach(b => b.onclick = () => {
+    const c = cl.find(x => x.id === b.dataset.id); if (!c) return;
+    const a = b.dataset.ca; b.disabled = true;
+    if (a === "pagar") cobSave({ ...c, pagado: true, pagos: [...(c.pagos || []), { fecha: todayStr(), importe: Number(c.precio) || 0, periodo: c.inicio }] }, `${c.nombre}: pago registrado`);
+    else if (a === "renovar"){ const v = cobStatus(c).venc; cobSave({ ...c, inicio: v, pagado: false }, `Nuevo periodo desde ${fDate(v)}`); }
+    else if (a === "reactivar") cobSave({ ...c, archivado: false }, "Cliente reactivado");
+    else { b.disabled = false; cobroForm(c); }
+  });
+}
+
+function cobroForm(c){
+  const isNew = !c, pr = (cob && cob.precios) || {};
+  const d = c ? clone(c) : { nombre: "", plan: "trimestral", precio: pr.trimestral ?? "", inicio: todayStr(), pagado: true, notas: "", pagos: [] };
+  let plan = d.plan, pagos = (d.pagos || []).slice();
+  const sh = sheet(`<div class="sh-h"><div><h3>${isNew ? "Nuevo cliente" : esc(d.nombre)}</h3><p>Cobros y renovaciones</p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <label class="fl"><span>Nombre</span><input id="cfN" value="${esc(d.nombre)}" placeholder="Nombre y apellido"></label>
+    <div class="fl"><span>Plan</span><div class="pl" id="cfP"><button type="button" data-p="trimestral" aria-pressed="${plan === "trimestral"}">Trimestral</button><button type="button" data-p="mensual" aria-pressed="${plan === "mensual"}">Mensual</button></div></div>
+    <div class="row2"><label class="fl"><span>Precio (€)</span><input id="cfPr" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(d.precio)}"></label>
+      <label class="fl"><span>Inicio del periodo</span><input id="cfI" type="date" value="${esc(d.inicio)}"></label></div>
+    <p class="note" id="cfV" style="margin:0 0 6px"></p>
+    ${isNew ? `<label class="tg"><input id="cfPg" type="checkbox" ${d.pagado ? "checked" : ""}> Ya pagó este periodo</label>` : ""}
+    <label class="fl"><span>Notas</span><textarea id="cfNo" rows="2" placeholder="Ej.: paga con Bizum, Mercado Pago…">${esc(d.notas)}</textarea></label>
+    ${!isNew && pagos.length ? `<div class="fl"><span>Pagos registrados</span><div class="hist" id="cfH"></div></div>` : ""}
+    <button class="btn" id="cfS" style="margin-top:12px">${isNew ? "Añadir" : "Guardar"}</button>
+    ${isNew ? "" : `<button class="ghost" id="cfA" style="margin-top:8px">${d.archivado ? "Reactivar" : "Dar de baja"}</button><button class="danger" id="cfD">Borrar cliente</button>`}`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  const upd = () => { const i = $("cfI").value; $("cfV").innerHTML = i ? `Vence el <b>${fDate(addMonths(i, PLANS[plan].months))}</b>` : ""; };
+  upd(); $("cfI").oninput = upd;
+  $("cfP").onclick = e => {
+    const b = e.target.closest("[data-p]"); if (!b) return;
+    const prev = plan; plan = b.dataset.p;
+    $("cfP").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.p === plan));
+    const p = $("cfPr"); if (prev !== plan && (p.value === "" || Number(p.value) === Number(pr[prev]))) p.value = pr[plan] ?? "";
+    upd();
+  };
+  const paintH = () => { const h = $("cfH"); if (!h) return;
+    h.innerHTML = pagos.map((p, i) => ({ p, i })).reverse().map(({ p, i }) => `<div><span>${fDate(p.fecha)}</span><b>${money(p.importe)}</b><button class="link" data-del="${i}">Quitar</button></div>`).join("") || `<div><span class="note">Sin pagos</span></div>`;
+    h.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { pagos.splice(+b.dataset.del, 1); paintH(); });
+  };
+  paintH();
+  $("cfS").onclick = async () => {
+    const nombre = $("cfN").value.trim(), inicio = $("cfI").value;
+    if (!nombre){ $("cfN").focus(); return toast("Escribe el nombre del cliente"); }
+    if (!inicio){ $("cfI").focus(); return toast("Pon la fecha de inicio"); }
+    const precio = Number($("cfPr").value) || 0;
+    const body = { ...d, nombre, plan, precio, inicio, notas: $("cfNo").value.trim(), archivado: !!d.archivado };
+    if (isNew){ body.pagado = $("cfPg").checked; body.pagos = body.pagado ? [{ fecha: todayStr(), importe: precio, periodo: inicio }] : []; body.creado = todayStr(); }
+    else body.pagos = pagos;
+    const b = $("cfS"); b.disabled = true; b.textContent = "Guardando…";
+    if (await cobSave(body, isNew ? `${nombre} añadido` : "Cambios guardados")) sh.close();
+    else { b.disabled = false; b.textContent = isNew ? "Añadir" : "Guardar"; }
+  };
+  if (!isNew){
+    $("cfA").onclick = async () => { if (await cobSave({ ...d, archivado: !d.archivado }, d.archivado ? "Cliente reactivado" : "Cliente dado de baja")) sh.close(); };
+    $("cfD").onclick = async () => {
+      if (!confirm(`¿Borrar a ${d.nombre} y todo su historial de pagos? No se puede deshacer.`)) return;
+      if (await cobSend({ action: "panelCobroDel", id: d.id }, "Cliente borrado")) sh.close();
+    };
+  }
+}
+
+function preciosForm(){
+  const pr = (cob && cob.precios) || {};
+  const sh = sheet(`<div class="sh-h"><div><h3>Precios por defecto</h3><p>Se rellenan solos al añadir un cliente</p></div><button class="icon-b" data-x>Cerrar</button></div>
+    <div class="row2"><label class="fl"><span>Trimestral (€)</span><input id="ppT" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(pr.trimestral ?? "")}"></label>
+      <label class="fl"><span>Mensual (€)</span><input id="ppM" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(pr.mensual ?? "")}" placeholder="Sin definir"></label></div>
+    <p class="note">Cada cliente puede tener su propio precio: esto es solo el que aparece al crear uno nuevo.</p>
+    <button class="btn" id="ppS" style="margin-top:12px">Guardar</button>`);
+  sh.querySelector("[data-x]").onclick = sh.close;
+  $("ppS").onclick = async () => { if (await cobSend({ action: "panelPrecios", precios: { trimestral: $("ppT").value, mensual: $("ppM").value } }, "Precios guardados")) sh.close(); };
+}
+
+if (!key) renderLogin(); else if (view === "cobros") loadCobros(false); else load(false);
 </script>
 </body>
 </html>
